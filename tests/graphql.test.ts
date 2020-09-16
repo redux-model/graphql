@@ -18,6 +18,38 @@ describe('Graphql', () => {
     );
   });
 
+  it('normal mutation', () => {
+    const tpl = graphql.mutation({
+      hello: types.number.null,
+      hi: types.undefined.string,
+      how: types.boolean
+    });
+
+    expect(tpl({}).query).to.equal(
+`mutation Hello {
+  hello
+  hi
+  how
+}`
+    );
+  });
+
+  it('normal subscription', () => {
+    const tpl = graphql.subscription({
+      hello: types.number.null,
+      hi: types.undefined.string,
+      how: types.boolean
+    });
+
+    expect(tpl({}).query).to.equal(
+`subscription Hello {
+  hello
+  hi
+  how
+}`
+    );
+  });
+
   it ('object query', () => {
     const tpl = graphql.query({
       hello: types.number,
