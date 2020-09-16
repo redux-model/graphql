@@ -1,12 +1,12 @@
 import { expect } from 'chai';
-import { graphql, type } from '../src';
+import { graphql, types } from '../src';
 
 describe('Graphql', () => {
   it('normal query', () => {
     const tpl = graphql.query({
-      hello: type.number.null,
-      hi: type.undefined.string,
-      how: type.boolean
+      hello: types.number.null,
+      hi: types.undefined.string,
+      how: types.boolean
     });
 
     expect(tpl({}).query).to.equal(
@@ -20,12 +20,12 @@ describe('Graphql', () => {
 
   it ('object query', () => {
     const tpl = graphql.query({
-      hello: type.number,
+      hello: types.number,
       hi: {
-        how: type.undefined.string,
+        how: types.undefined.string,
         are: {
           you: {
-            lucy: type.string,
+            lucy: types.string,
           },
         },
       }
@@ -48,12 +48,12 @@ describe('Graphql', () => {
 
   it ('array query', () => {
     const tpl = graphql.query({
-      hello: type.number,
+      hello: types.number,
       hi: {
-        how: type.undefined.string,
+        how: types.undefined.string,
         are: {
-          you: type.array({
-            lucy: type.string,
+          you: types.array({
+            lucy: types.string,
           }),
         },
       }
@@ -76,11 +76,11 @@ describe('Graphql', () => {
 
   it ('function query', () => {
     const tpl = graphql.query({
-      hello: type.number,
-      hi: type.fn(['a_Int'], {
-        how: type.undefined.string,
+      hello: types.number,
+      hi: types.fn(['a_Int'], {
+        how: types.undefined.string,
         are: {
-          you: type.boolean,
+          you: types.boolean,
         },
       }),
     });
@@ -100,11 +100,11 @@ describe('Graphql', () => {
 
   it ('function query with diretives', () => {
     const tpl = graphql.query({
-      hello: type.number,
-      hi: type.include('b_Boolean').skip('c_Boolean').fn(['a_Int'], {
-        how: type.undefined.string,
+      hello: types.number,
+      hi: types.include('b_Boolean').skip('c_Boolean').fn(['a_Int'], {
+        how: types.undefined.string,
         are: {
-          you: type.boolean,
+          you: types.boolean,
         },
       }),
     });
@@ -124,7 +124,7 @@ describe('Graphql', () => {
 
   it ('wrong function parameter name', () => {
     const tpl = graphql.query({
-      hello: type.fn(['a'], {}),
+      hello: types.fn(['a'], {}),
     });
 
     expect(() => tpl({ a: 0 })).to.throw();
@@ -132,13 +132,13 @@ describe('Graphql', () => {
 
   it ('function with duplicate parameter', () => {
     const tpl = graphql.query({
-      hello:  type.fn(['a_Int', 'b_String'], {
-        id: type.number,
+      hello:  types.fn(['a_Int', 'b_String'], {
+        id: types.number,
       }),
-      hi: type.fn(['a_Int', 'b_String'], {
-        how: type.undefined.string,
+      hi: types.fn(['a_Int', 'b_String'], {
+        how: types.undefined.string,
         are: {
-          you: type.boolean,
+          you: types.boolean,
         },
       }),
     });
@@ -160,11 +160,11 @@ describe('Graphql', () => {
 
   it ('function parameter with alias variable', () => {
     const tpl = graphql.query({
-      hello: type.number,
-      hi: type.fn(['other:a_Int'], {
-        how: type.undefined.string,
+      hello: types.number,
+      hi: types.fn(['other:a_Int'], {
+        how: types.undefined.string,
         are: {
-          you: type.boolean,
+          you: types.boolean,
         },
       }),
     });
@@ -184,13 +184,13 @@ describe('Graphql', () => {
 
   it('alias', () => {
     const tpl = graphql.query({
-      hello: type.number.aliasOf('h'),
-      hi: type.undefined.string.aliasOf('hii'),
-      how: type.aliasOf('who').object({
-        are: type.boolean,
+      hello: types.number.aliasOf('h'),
+      hi: types.undefined.string.aliasOf('hii'),
+      how: types.aliasOf('who').object({
+        are: types.boolean,
       }),
-      list: type.aliasOf('result').fn(['a_Int'], {
-        id: type.number,
+      list: types.aliasOf('result').fn(['a_Int'], {
+        id: types.number,
       }),
     });
 
@@ -210,13 +210,13 @@ describe('Graphql', () => {
 
   it('inline fragment', () => {
     const tpl = graphql.query({
-      hello: type.number,
-      hi: type.undefined.string,
-      ...type.on({
+      hello: types.number,
+      hi: types.undefined.string,
+      ...types.on({
         User: {
-          id: type.number,
+          id: types.number,
           name: {
-            desc: type.string,
+            desc: types.string,
           }
         },
       })
@@ -238,19 +238,19 @@ describe('Graphql', () => {
 
   it ('fragment', () => {
     const fragment = graphql.fragment('User', {
-      id: type.number,
-      name: type.string,
+      id: types.number,
+      name: types.string,
     });
 
     const adminFragment = graphql.fragment('Admin', {
-      i: type.number,
-      j: type.boolean,
-      k: type.undefined,
+      i: types.number,
+      j: types.boolean,
+      k: types.undefined,
     })
 
     const tpl = graphql.query({
-      hello: type.number,
-      hi: type.undefined.string,
+      hello: types.number,
+      hi: types.undefined.string,
       ...fragment,
       ok: {
         ...fragment,
@@ -284,19 +284,19 @@ fragment AdminFragment on Admin {
 
   it ('duplicate fragment', () => {
     const fragment = graphql.fragment('User', {
-      id: type.number,
-      name: type.string,
+      id: types.number,
+      name: types.string,
     });
 
     const fragment1 = graphql.fragment('User', {
-      i: type.number,
-      j: type.boolean,
-      k: type.undefined,
+      i: types.number,
+      j: types.boolean,
+      k: types.undefined,
     });
 
     const tpl = graphql.query({
-      hello: type.number,
-      hi: type.undefined.string,
+      hello: types.number,
+      hi: types.undefined.string,
       ...fragment,
       ok: {
         ...fragment,
@@ -330,19 +330,19 @@ fragment UserFragment_1 on User {
 
   it ('fragment with specific name', () => {
     const fragment = graphql.fragment('User', {
-      id: type.number,
-      name: type.string,
+      id: types.number,
+      name: types.string,
     });
 
     const fragment1 = graphql.fragment({ name: 'customUserFragment', on: 'User' }, {
-      i: type.number,
-      j: type.boolean,
-      k: type.undefined,
+      i: types.number,
+      j: types.boolean,
+      k: types.undefined,
     })
 
     const tpl = graphql.query({
-      hello: type.number,
-      hi: type.undefined.string,
+      hello: types.number,
+      hi: types.undefined.string,
       ...fragment,
       ok: {
         ...fragment,
@@ -376,15 +376,15 @@ fragment customUserFragment on User {
 
   it ('fragment includes function', () => {
     const fragment = graphql.fragment('User', {
-      id: type.number,
-      name: type.fn(['id_Int'], {
-        name: type.string,
+      id: types.number,
+      name: types.fn(['id_Int'], {
+        name: types.string,
       }),
     });
 
     const tpl = graphql.query({
-      hello: type.number,
-      hi: type.undefined.string,
+      hello: types.number,
+      hi: types.undefined.string,
       ...fragment,
       ok: {
         ...fragment,

@@ -1,2 +1,2 @@
-export { type } from './type';
+export { types } from './types';
 export { graphql } from './graphql';

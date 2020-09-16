@@ -17,15 +17,15 @@ yarn add @redux-model/graphql
 # 基础用法
 ```typescript
 import { Model } from '@redux-model/react';
-import { type, graphql } from '@redux-model/graphql';
+import { types, graphql } from '@redux-model/graphql';
 
 const getUserTpl = graphql.query({
   getUser: {
-    id: type.number,   // number
-    name: type.string, // string
+    id: types.number,   // number
+    name: types.string, // string
     bankAccount: {     // object
-      id: type.number,
-      branch: type.string.number,   // string | number
+      id: types.number,
+      branch: types.string.number,   // string | number
     },
   }
 });
@@ -71,10 +71,10 @@ class TestModel extends Model<Data> {
 ```typescript
 const tpl = graphql.query({
   getUser: {
-    id: type.number,
-    logs: type.fn(['page_Int', 'size_Int'], type.array({
-      id: type.number,
-      title: type.string,
+    id: types.number,
+    logs: types.fn(['page_Int', 'size_Int'], types.array({
+      id: types.number,
+      title: types.string,
     })),
   }
 });
@@ -103,12 +103,12 @@ this
 # 片段
 ```typescript
 const fragment1 = graphql.fragment('User', {
-  name: type.string,
+  name: types.string,
 });
 
 const tpl = graphql.query({
   getUser: {
-    id: type.number,
+    id: types.number,
     ...fragment1,
   }
 });
@@ -130,15 +130,15 @@ const tpl = graphql.query({
 ```typescript
 const tpl = graphql.query({
   getUser: {
-    id: type.number,
-    ...type.on({
+    id: types.number,
+    ...types.on({
       User: {
-        name: type.string,
+        name: types.string,
       },
     }),
-    ...type.on({
+    ...types.on({
       Admin: {
-        title: type.string,
+        title: types.string,
       },
     }),
   }
@@ -163,17 +163,17 @@ const tpl = graphql.query({
 ```typescript
 const tpl = graphql.query({
   getUser: {
-    id: type.number,
-    ...type.on({
+    id: types.number,
+    ...types.on({
       User: {
-        kind: type.custom<'User'>(),
-        name: type.string,
-        age: type.number,
+        kind: types.custom<'User'>(),
+        name: types.string,
+        age: types.number,
       },
       Admin: {
-        kind: type.custom<'Admin'>(),
-        name1: type.string,
-        age1: type.number,
+        kind: types.custom<'Admin'>(),
+        name1: types.string,
+        age1: types.number,
       },
     }),
   }
@@ -209,10 +209,10 @@ if (data.kind === 'User') {
 ```typescript
 const tpl = graphql.query({
   getUser: {
-    id: type.number.include('test_Boolean'),   // number | undefined
-    logs: type.skip('other_Boolean').object({  // object | undefined
-      id: type.number,
-      title: type.string,
+    id: types.number.include('test_Boolean'),   // number | undefined
+    logs: types.skip('other_Boolean').object({  // object | undefined
+      id: types.number,
+      title: types.string,
     }),
   }
 });

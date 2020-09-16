@@ -229,4 +229,4 @@ export class AdvancedType<T = unknown, U = unknown> extends Type<T, U> {
   }
 }
 
-export const type = new AdvancedType();
+export const types = new AdvancedType();

@@ -1,7 +1,8 @@
 {
-  "name": "@redux-model/graph",
-  "version": "0.0.1",
-  "main": "index.js",
+  "name": "@redux-model/graphql",
+  "version": "0.0.2",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "repository": "git@github.com:redux-model/graph.git",
   "author": "范文华 <531362022@qq.com>",
   "license": "MIT",

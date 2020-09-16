@@ -1,5 +1,5 @@
 import { fragmentKey, FragmentMeta } from './fragment';
-import { Base } from './type';
+import { Base } from './types';
 
 export type Definition<K, V> = Base<K, V> | {
   [key: string]: Definition<K, V> | undefined;

@@ -1,9 +1,9 @@
-import { graphql, type } from '../src';
+import { graphql, types } from '../src';
 
 describe('Type definition', () => {
   it ('number', () => {
     const tpl = graphql.query({
-      hello: type.number,
+      hello: types.number,
     });
 
     (function () {
@@ -13,7 +13,7 @@ describe('Type definition', () => {
 
   it ('string', () => {
     const tpl = graphql.query({
-      hello: type.string,
+      hello: types.string,
     });
 
     (function () {
@@ -23,7 +23,7 @@ describe('Type definition', () => {
 
   it ('boolean', () => {
     const tpl = graphql.query({
-      hello: type.boolean,
+      hello: types.boolean,
     });
 
     (function () {
@@ -33,8 +33,8 @@ describe('Type definition', () => {
 
   it ('custom', () => {
     const tpl = graphql.query({
-      hello: type.custom<'User'>(),
-      hi: type.custom<1>(),
+      hello: types.custom<'User'>(),
+      hi: types.custom<1>(),
     });
 
     (function () {
@@ -49,19 +49,19 @@ describe('Type definition', () => {
 
   it ('array', () => {
     const tpl = graphql.query({
-      hello: type.array({
-        id: type.number,
-        name: type.string,
-        vip: type.boolean.undefined,
+      hello: types.array({
+        id: types.number,
+        name: types.string,
+        vip: types.boolean.undefined,
       }),
     });
 
     const tpl2 = graphql.query({
-      hello: type.array(type.number),
-      hi: type.array(type.object({
-        man: type.string,
+      hello: types.array(types.number),
+      hi: types.array(types.object({
+        man: types.string,
       })),
-      wow: type.array(type.string.undefined),
+      wow: types.array(types.string.undefined),
     });
 
     (function () {
@@ -87,18 +87,18 @@ describe('Type definition', () => {
     const tpl = graphql.query({
       hello: {
         hi: {
-          world: type.number,
+          world: types.number,
         },
-        hello: type.string,
+        hello: types.string,
       },
     });
 
     const tpl2 = graphql.query({
       hello: {
-        hi: type.object({
-          world: type.number,
+        hi: types.object({
+          world: types.number,
         }),
-        hello: type.string,
+        hello: types.string,
       },
     });
 
@@ -112,7 +112,7 @@ describe('Type definition', () => {
 
   it ('number + string', () => {
     const tpl = graphql.query({
-      hello: type.number.string,
+      hello: types.number.string,
     });
 
     (function () {
@@ -126,7 +126,7 @@ describe('Type definition', () => {
 
   it ('number + string + boolean', () => {
     const tpl = graphql.query({
-      hello: type.number.string.boolean,
+      hello: types.number.string.boolean,
     });
 
     (function () {
@@ -140,7 +140,7 @@ describe('Type definition', () => {
 
   it ('number + string + boolean + undefined', () => {
     const tpl = graphql.query({
-      hello: type.number.string.boolean.undefined,
+      hello: types.number.string.boolean.undefined,
     });
 
     (function () {
@@ -156,7 +156,7 @@ describe('Type definition', () => {
 
   it ('number + undefined', () => {
     const tpl = graphql.query({
-      hello: type.number.undefined,
+      hello: types.number.undefined,
     });
 
     (function () {
@@ -168,7 +168,7 @@ describe('Type definition', () => {
 
   it ('string + undefined', () => {
     const tpl = graphql.query({
-      hello: type.string.undefined,
+      hello: types.string.undefined,
     });
 
     (function () {
@@ -180,8 +180,8 @@ describe('Type definition', () => {
 
   it ('function ()=> object', () => {
     const tpl = graphql.query({
-      hello: type.fn(['a_Int', 'b_String'], {
-        id: type.number,
+      hello: types.fn(['a_Int', 'b_String'], {
+        id: types.number,
       }),
     });
 
@@ -207,7 +207,7 @@ describe('Type definition', () => {
 
   it ('function ()=> number', () => {
     const tpl = graphql.query({
-      hello: type.fn(['a_Int!', 'b_String'], type.number),
+      hello: types.fn(['a_Int!', 'b_String'], types.number),
     });
 
     (function () {
@@ -217,9 +217,9 @@ describe('Type definition', () => {
 
   it ('function ()=> array', () => {
     const tpl = graphql.query({
-      hello: type.fn([], type.array({
-        id: type.number,
-        name: type.string,
+      hello: types.fn([], types.array({
+        id: types.number,
+        name: types.string,
       })),
     });
 
@@ -233,9 +233,9 @@ describe('Type definition', () => {
 
   it ('function ()=> object', () => {
     const tpl = graphql.query({
-      hello: type.fn([], {
-        id: type.number,
-        name: type.string,
+      hello: types.fn([], {
+        id: types.number,
+        name: types.string,
       }),
     });
 
@@ -249,18 +249,18 @@ describe('Type definition', () => {
   it ('inline fragment', () => {
     const tpl = graphql.query({
       hello: {
-        id: type.number,
-        name: type.string,
-        ...type.on({
+        id: types.number,
+        name: types.string,
+        ...types.on({
           User: {
-            kind: type.custom<'User'>(),
-            age: type.number,
-            age1: type.number,
+            kind: types.custom<'User'>(),
+            age: types.number,
+            age1: types.number,
           },
           Admin: {
-            kind: type.custom<'Admin'>(),
-            age: type.string.undefined,
-            age2: type.number,
+            kind: types.custom<'Admin'>(),
+            age: types.string.undefined,
+            age2: types.number,
           }
         })
       },
@@ -300,22 +300,22 @@ describe('Type definition', () => {
 
   it ('fragment', () => {
     const usreFragment = graphql.fragment('User', {
-      hello: type.number,
-      hi: type.string.undefined,
+      hello: types.number,
+      hi: types.string.undefined,
       man: {
-        woman: type.number,
+        woman: types.number,
       }
     });
 
     const adminFragment = graphql.fragment({ name: 'admin', on: 'Admin' }, {
-      age: type.number,
+      age: types.number,
     });
 
     const tpl = graphql.query({
-      id: type.number,
+      id: types.number,
       ...usreFragment,
-      list: type.fn(['id_Int'], {
-        id: type.string.include(''),
+      list: types.fn(['id_Int'], {
+        id: types.string.include(''),
         ...usreFragment,
         ...adminFragment,
       }),
@@ -334,15 +334,15 @@ describe('Type definition', () => {
 
   it ('fragment with function', () => {
     const fragment = graphql.fragment('Admin', {
-      list: type.fn(['a_Int'], {
-        id: type.number,
-        name: type.string,
+      list: types.fn(['a_Int'], {
+        id: types.number,
+        name: types.string,
       }),
     });
 
     const tpl = graphql.query({
-      result: type.fn(['b_String'], {
-        id: type.number,
+      result: types.fn(['b_String'], {
+        id: types.number,
       }),
       ...fragment
     });
@@ -357,8 +357,8 @@ describe('Type definition', () => {
 
   it ('include', () => {
     const tpl = graphql.query({
-      hello: type.number.include('red_Boolean'),
-      hi: type.string,
+      hello: types.number.include('red_Boolean'),
+      hi: types.string,
     });
 
     (function() {
@@ -377,8 +377,8 @@ describe('Type definition', () => {
 
   it ('skip', () => {
     const tpl = graphql.query({
-      hello: type.number.skip('red_Boolean'),
-      hi: type.string,
+      hello: types.number.skip('red_Boolean'),
+      hi: types.string,
     });
 
     (function() {
