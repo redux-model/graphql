@@ -33,6 +33,7 @@ export const parse = (type: string, name: string | undefined, nodes: Definition<
 const cycleParse = (nodes: Definition<any, any>, ctx: ParseContext, space: number): any => {
   // types
   if (nodes instanceof Base) {
+    // collect args to top
     if (nodes.totalArgs) {
       nodes.totalArgs.forEach((arg) => {
         if (!~ctx.args.indexOf(arg)) {
@@ -41,9 +42,12 @@ const cycleParse = (nodes: Definition<any, any>, ctx: ParseContext, space: numbe
       });
     }
 
+    // alias
     const realName = nodes.realName ? `: ${nodes.realName}` : '';
+    // directives
     const include = nodes.includeData ? ` @include(if: $${parseParameter(nodes.includeData.arg).variable})` : '';
     const skip = nodes.skipData ? ` @skip(if: $${parseParameter(nodes.skipData.arg).variable})` : '';
+    const prefix = `${realName}${include}${skip}`;
 
     // function
     if (nodes.fnArgs) {
@@ -52,16 +56,16 @@ const cycleParse = (nodes: Definition<any, any>, ctx: ParseContext, space: numbe
         return `${arg.name}: $${arg.variable}`;
       });
 
-      return `${realName}${include}${skip} (${args.join(', ')})${cycleParse(nodes.returns!, ctx, space)}`;
+      return `${prefix} (${args.join(', ')})${cycleParse(nodes.returns!, ctx, space)}`;
     }
 
     // Object or Array
     if (nodes.returns) {
-      return `${realName}${include}${skip}${cycleParse(nodes.returns, ctx, space)}`;
+      return `${prefix}${cycleParse(nodes.returns, ctx, space)}`;
     }
 
-    // normal
-    return realName;
+    // normal string, number or boolean
+    return prefix;
   }
 
   const newNodes = {};

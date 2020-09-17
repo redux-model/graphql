@@ -130,9 +130,9 @@ describe('Graphql', () => {
     );
   });
 
-  it ('function query with diretives', () => {
+  it ('function query with directives', () => {
     const tpl = graphql.query({
-      hello: types.number,
+      hello: types.number.include('b_Boolean'),
       hi: types.include('b_Boolean').skip('c_Boolean').fn(['a_Int'], {
         how: types.undefined.string,
         are: {
@@ -143,7 +143,7 @@ describe('Graphql', () => {
 
     expect(tpl({ a_Int: 3, b_Boolean: false, c_Boolean: true }).query).to.equal(
 `query Hello ($b: Boolean, $c: Boolean, $a: Int) {
-  hello
+  hello @include(if: $b)
   hi @include(if: $b) @skip(if: $c) (a: $a) {
     how
     are {
