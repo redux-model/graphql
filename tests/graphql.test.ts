@@ -214,6 +214,24 @@ describe('Graphql', () => {
     );
   });
 
+  it ('function returns boolean, number or string', () => {
+    const tpl = graphql.query({
+      hello: types.fn(['a_Int'], types.boolean),
+      hi: types.fn(['a_Int'], types.number),
+      how: types.fn(['a_Int'], types.string),
+      are: types.fn(['a_Int'], types.number.string.undefined.null),
+    });
+
+    expect(tpl({ a_Int: 3 }).query).to.equal(
+`query Hello ($a: Int) {
+  hello (a: $a)
+  hi (a: $a)
+  how (a: $a)
+  are (a: $a)
+}`
+    );
+  });
+
   it('alias', () => {
     const tpl = graphql.query({
       hello: types.number.aliasOf('h'),
