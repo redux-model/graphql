@@ -1,17 +1,9 @@
 import { Definition, parse, ParseContext } from './parse';
-import { Base, Parse, Type } from './types';
+import { Parse, VarParams } from './types';
 
 type Variables<T> = {
-  [K in Params<T>]: string | number | boolean | object | undefined;
+  [K in VarParams<T>]: string | number | boolean | object | undefined;
 };
-
-type Params<T> = {
-  [K in keyof T]: T[K] extends Type<any, infer U> | Base<any, infer U>
-    ? unknown extends U
-      ? never
-      : U
-    : never
-}[keyof T];
 
 export type Context = {
   type: string;
@@ -58,5 +50,6 @@ export function query<T extends Definition<K, V>, K extends any, V extends any>(
   fn.type = undefined as any;
   fn.toString = getQuery;
 
+  // @ts-ignore
   return fn;
 };

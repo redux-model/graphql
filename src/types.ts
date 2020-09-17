@@ -19,16 +19,43 @@ type ParseJson<T> = T extends Type<infer U, any> | Base<infer U, any>
     }
     : never;
 
-interface Condition {
-  arg: string;
-}
+export type VarParams<T> = T extends AnyType ? VarTypeParams<T> : VarObjectParams<T>;
+
+type AnyType = Type<any, any>;
+
+type VarTypeParams<T> = T extends Type<any, infer U>
+  ? unknown extends U
+    ? never
+    : U
+  : never;
+
+/**
+ * To resolve error: `Type instantiation is excessively deep and possibly infinite`, we should not reference VarParams here, just repeat the type until 5th level.
+ *
+ * Be careful that 6th level will cause the same error.
+ */
+type VarObjectParams<T> = {
+  [K in keyof T]: T[K] extends AnyType ? VarTypeParams<T[K]> : VarObjectParams_2<T[K]>
+}[keyof T];
+type VarObjectParams_2<T> = {
+  [K in keyof T]: T[K] extends AnyType ? VarTypeParams<T[K]> : VarObjectParams_3<T[K]>
+}[keyof T];
+type VarObjectParams_3<T> = {
+  [K in keyof T]: T[K] extends AnyType ? VarTypeParams<T[K]> : VarObjectParams_4<T[K]>
+}[keyof T];
+type VarObjectParams_4<T> = {
+  [K in keyof T]: T[K] extends AnyType ? VarTypeParams<T[K]> : VarObjectParams_5<T[K]>
+}[keyof T];
+type VarObjectParams_5<T> = {
+  [K in keyof T]: T[K] extends AnyType ? VarTypeParams<T[K]> : never;
+}[keyof T];
 
 export class Base<_, __> {
   public/*protected*/ fnArgs?: string[];
   public/*protected*/ totalArgs?: string[];
   public/*protected*/ realName?: string;
-  public/*protected*/ includeData?: Condition;
-  public/*protected*/ skipData?: Condition;
+  public/*protected*/ includeData?: { arg: string };
+  public/*protected*/ skipData?: { arg: string };
   public/*protected*/ returns?: Definition<any, any>;
 
   aliasOf(realName: string): this {
@@ -105,9 +132,28 @@ export class Type<T, U> extends Base<T, U> {
    * }
    * ```
    */
-  object<T1 extends Definition<K, V>, K extends any, V extends any>(items: T1): Type<Or<T, Parse<T1>>, U> {
+  object<T1 extends Definition<K, V>, K extends any, V extends any>(items: T1): Type<Or<T, Parse<T1>>, Or<U, VarParams<T1>>> {
     const that = this.clone();
     that.returns = items;
+    return that;
+  }
+
+  /**
+   * ```
+   * {
+   *   lists {
+   *     id
+   *     number
+   *   }
+   * }
+   * ```
+   */
+  array<T1 extends Definition<K, V>, K extends any, V extends any>(
+    // @ts-ignore
+    each: T1
+  ): Type<Or<T, Parse<T1>[]>, Or<U, VarParams<T1>>> {
+    const that = this.clone();
+    that.returns = each;
     return that;
   }
 
@@ -153,25 +199,6 @@ export class Type<T, U> extends Base<T, U> {
       arg: ifParam_Type,
     };
     that.appendArgs([ifParam_Type]);
-    return that;
-  }
-
-  /**
-   * ```
-   * {
-   *   lists {
-   *     id
-   *     number
-   *   }
-   * }
-   * ```
-   */
-  array<T1 extends Definition<K, V>, K extends any, V extends any>(
-    // @ts-ignore
-    each: T1
-  ): Type<Or<T, Parse<T1>[]>, U> {
-    const that = this.clone();
-    that.returns = each;
     return that;
   }
 

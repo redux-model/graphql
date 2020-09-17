@@ -246,6 +246,86 @@ describe('Type definition', () => {
     });
   });
 
+  it ('deep level function', () => {
+    const tpl = graphql.query({
+      hello: {
+        name: types.fn(['a_Int'], types.boolean),
+        world: {
+          end: types.fn(['a1_Int'], types.boolean),
+        }
+      },
+      hi: types.object({
+        name: types.fn(['b_Int'], types.boolean),
+      }),
+      how: types.array({
+        name: types.fn(['c_Int'], types.boolean),
+      }),
+      are: types.array(types.object({
+        name: types.fn(['d_Int'], types.boolean),
+      })),
+    });
+
+    (function() {
+      tpl({
+        a_Int: 2,
+        a1_Int: 3,
+        b_Int: 2,
+        c_Int: 2,
+        d_Int: 2,
+      });
+
+      tpl({
+        a_Int: 2,
+        a1_Int: 3,
+        b_Int: 2,
+        c_Int: 2,
+        d_Int: 2,
+        // @ts-expect-error
+        not_exist: 4,
+      });
+
+      // @ts-expect-error
+      tpl({
+        a1_Int: 3,
+        b_Int: 2,
+        c_Int: 2,
+        d_Int: 2,
+      });
+
+      // @ts-expect-error
+      tpl({
+        a_Int: 3,
+        b_Int: 2,
+        c_Int: 2,
+        d_Int: 2,
+      });
+
+      // @ts-expect-error
+      tpl({
+        a_Int: 3,
+        a1_Int: 3,
+        c_Int: 2,
+        d_Int: 2,
+      });
+
+      // @ts-expect-error
+      tpl({
+        a_Int: 3,
+        a1_Int: 3,
+        b_Int: 2,
+        d_Int: 2,
+      });
+
+      // @ts-expect-error
+      tpl({
+        a_Int: 3,
+        a1_Int: 3,
+        b_Int: 2,
+        c_Int: 2,
+      });
+    });
+  });
+
   it ('inline fragment', () => {
     const tpl = graphql.query({
       hello: {
