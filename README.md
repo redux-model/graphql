@@ -1,5 +1,5 @@
 # redux-model-graphql
-Graphql模板运行时生成工具，同时支自动生成Typescript类型， 辅助[Redux-Model](https://github.com/redux-model/redux-model)实现graphql请求
+Graphql模板运行时工具，自动生成标准模板和Typescript类型， 配合[Redux-Model](https://github.com/redux-model/redux-model)实现graphql请求。
 
 [![License](https://img.shields.io/github/license/redux-model/graphql)](https://github.com/redux-model/graphql/blob/master/LICENSE)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/redux-model/graphql/CI/master)](https://github.com/redux-model/graphql/actions)
@@ -12,7 +12,10 @@ yarn add @redux-model/graphql
 ```
 
 # 注意事项
-* 函数参数需遵循：`xxx_Int`, `yyy_String!`, `zzz_ObjInput`，以下划线`_`分割参数名和类型，否则会报错
+因为action本来就定义了参数，所以函数参数不再做类型约束。函数参数需遵循：`xxx_Int`, `yyy_String!`, `zzz_ObjInput`，以下划线`_`分割参数名和类型，这么做的好处是：
+
+1. 能够自动收集参数到模板顶部，提高效率
+2. 传递实参时，对类型一目了然，防止出错
 
 # 基础用法
 ```typescript
@@ -31,8 +34,9 @@ const getUserTpl = graphql.query({
 });
 
 // console.log(getUserTpl.toString());
+
 // 生成模板：
-// query getUser {
+// query GetUserr {
 //   getUser {
 //     id
 //     name
@@ -80,7 +84,7 @@ const tpl = graphql.query({
 });
 
 // 生成模板：
-// query getUser ($page: Int, $size: Int) {
+// query GetUserr ($page: Int, $size: Int) {
 //   getUser: {
 //     id
 //     logs (page: $page, size: $size) {
@@ -91,13 +95,23 @@ const tpl = graphql.query({
 // }
 
 // 在模型中使用
-this
-  .post('/graphql')
-  .graphql(tpl({
-    page_Int: 1,
-    size_Int: 10,
-  }))
-  .onSuccess((state, action) => {});
+class TestModel extends Model<Data> {
+  getUser = $api.action((page: number, size: number = 10) => {
+    return this
+      .post<Response>('/graphql')
+      .graphql(tpl({
+        page_Int: page,
+        size_Int: size,
+      }))
+      .onSuccess((state, action) => {
+        state.list = action.response.data;
+      });
+  });
+
+  protected initialState(): Data {
+    return {};
+  }
+}
 ```
 
 # 片段
@@ -114,7 +128,7 @@ const tpl = graphql.query({
 });
 
 // 生成模板：
-// query getUse {
+// query GetUserr {
 //   getUser: {
 //     id
 //     ...UserFragment
@@ -145,7 +159,7 @@ const tpl = graphql.query({
 });
 
 // 生成模板：
-// query getUse {
+// query GetUser {
 //   getUser: {
 //     id
 //     ... on User {
@@ -180,7 +194,7 @@ const tpl = graphql.query({
 });
 
 // 生成模板：
-// query getUse {
+// query GetUser {
 //   getUser: {
 //     id
 //     ... on User {
@@ -218,7 +232,7 @@ const tpl = graphql.query({
 });
 
 // 生成模板：
-// query getUser ($test: Boolean, $other: Boolean) {
+// query GetUserr ($test: Boolean, $other: Boolean) {
 //   getUser: {
 //     id @include(if: $test)
 //     logs @skip(if: $other) {
