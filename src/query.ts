@@ -1,53 +1,56 @@
 import { Definition, parse, ParseContext } from './parse';
 import { Parse, VarParams } from './types';
 
-type Variables<T> = {
+type Variable<T> = {
   [K in VarParams<T>]: string | number | boolean | object | undefined;
 };
 
-export type Context = {
+type QueryThis = {
   type: string;
 };
 
-export function query<T extends Definition<K, V>, K extends any, V extends any>(tpl: T, options?: {
-  name?: string;
-}): {
-  (variables: Variables<T>): {
-    query: string;
-    variables: typeof variables;
-  };
+export type QueryReturn<T> = {
+  (variables: Variable<T>): { query: string; variables: typeof variables };
   type: Parse<T>;
   toString(): string;
-} {
+};
+
+export const createContext = (type: string): typeof query => {
+  return query.bind(<QueryThis>{
+    type: type,
+  });
+};
+
+export function query<T extends Definition<K, V>, K extends any, V extends any>(
+  tpl: T, options?: { name?: string }
+): QueryReturn<T> {
   const ctx: ParseContext = {
     params: [],
     paramAlias: {},
     fragmentStrs: [],
     fragmentObjs: [],
     fragmentIndex: {},
-  }
+  };
 
   // @ts-ignore
-  const type = (this as Context).type;
-
-  let _query: string | undefined;
-  const getQuery = () => _query || (_query = parse(type, options && options.name, tpl, ctx));
+  const type = (this as QueryThis).type;
+  let lazyQuery: string | undefined;
+  const getQuery = () => lazyQuery || (lazyQuery = parse(type, options && options.name, tpl, ctx));
 
   const fn = (variables: object) => {
     const query = getQuery();
-    const newArgs = {};
+    const args = {};
 
     Object.keys(variables).forEach((key) => {
-      newArgs[ctx.paramAlias[key]] = variables[key];
+      args[ctx.paramAlias[key]] = variables[key];
     });
 
     return {
       query: query,
-      variables: newArgs,
+      variables: args,
     };
   };
 
-  fn.type = undefined as any;
   fn.toString = getQuery;
 
   // @ts-ignore
