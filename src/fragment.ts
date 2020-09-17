@@ -16,17 +16,19 @@ export const createFragmentKey = (on: string) => {
   return fragmentKey + on + '@' + ++fragmentKeyIndex;
 };
 
-export const fragment = <T extends Record<string, Definition<K, V>>, K extends any, V extends any>(on: string | { name: string; on: string }, definition: T): T => {
-  const meta: { on: string; name: string } = typeof on === 'string' ? {
-    name: '',
-    on,
-  } : on;
+export interface Option {
+  on: string;
+  name: string;
+}
+
+export const fragment = <T extends Record<string, Definition<K, V>>, K extends any, V extends any>(on: string | Option, definition: T): T => {
+  const option: Option = typeof on === 'string' ? { name: '', on } : on;
 
   // @ts-ignore
   return {
-    [createFragmentKey(meta.on)]: <FragmentMeta>{
-      on: meta.on,
-      name: meta.name,
+    [createFragmentKey(option.on)]: <FragmentMeta>{
+      on: option.on,
+      name: option.name,
       tmpName: '',
       inline: false,
       definition: definition,
