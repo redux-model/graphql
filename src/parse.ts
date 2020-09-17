@@ -1,62 +1,57 @@
 import { fragmentKey, FragmentMeta } from './fragment';
-import { Base } from './types';
+import { Type } from './types';
 
-export type Definition<K, V> = Base<K, V> | {
+export type Definition<K, V> = Type<K, V> | {
   [key: string]: Definition<K, V> | undefined;
 };
 
 export interface ParseContext {
-  args: string[];
-  fragments: string[];
+  params: string[];
+  fragmentStrs: string[];
   fragmentObjs: FragmentMeta[];
   fragmentIndex: Record<string, number>;
-  argAlias: Record<string, string>,
+  paramAlias: Record<string, string>,
 }
 
 export const parse = (type: string, name: string | undefined, nodes: Definition<any, any>, ctx: ParseContext): string => {
   name = name || capitalize(Object.keys(nodes)[0] || type);
 
-  const newNodes = cycleParse(nodes, ctx, -2);
-  const argDict = ctx.args.map((key) => {
+  const body = cycleParse(nodes, ctx, -2);
+  const params = ctx.params.map((key) => {
     const arg = parseParameter(key);
-    ctx.argAlias[key] = arg.variable;
+    ctx.paramAlias[key] = arg.variable;
 
     return `$${arg.variable}: ${arg.type}`;
   }).filter(Boolean);
+  const paramStr = params.length ? ` (${params.join(', ')})` : '';
 
-  const args = argDict.length ? ` (${argDict.join(', ')})` : '';
-  const tpl = `${type} ${name}${args}${newNodes}${ctx.fragments.join('')}`;
-
-  return tpl;
+  return `${type} ${name}${paramStr}${body}${ctx.fragmentStrs.join('')}`;
 };
 
-const cycleParse = (nodes: Definition<any, any>, ctx: ParseContext, space: number): any => {
-  // types
-  if (nodes instanceof Base) {
+const cycleParse = (nodes: Definition<any, any>, ctx: ParseContext, space: number): string => {
+  if (nodes instanceof Type) {
     // collect args to top
-    if (nodes.totalArgs) {
-      nodes.totalArgs.forEach((arg) => {
-        if (!~ctx.args.indexOf(arg)) {
-          ctx.args.push(arg);
-        }
+    if (nodes.totalParams) {
+      nodes.totalParams.forEach((arg) => {
+        ~ctx.params.indexOf(arg) || ctx.params.push(arg);
       });
     }
 
     // alias
     const realName = nodes.realName ? `: ${nodes.realName}` : '';
     // directives
-    const include = nodes.includeData ? ` @include(if: $${parseParameter(nodes.includeData.arg).variable})` : '';
-    const skip = nodes.skipData ? ` @skip(if: $${parseParameter(nodes.skipData.arg).variable})` : '';
+    const include = nodes.includeData ? ` @include(if: $${parseParameter(nodes.includeData.param).variable})` : '';
+    const skip = nodes.skipData ? ` @skip(if: $${parseParameter(nodes.skipData.param).variable})` : '';
     const prefix = `${realName}${include}${skip}`;
 
     // function
-    if (nodes.fnArgs) {
-      const args = nodes.fnArgs.map((key) => {
-        const arg = parseParameter(key);
-        return `${arg.name}: $${arg.variable}`;
-      });
+    if (nodes.fnParams) {
+      const params = nodes.fnParams.map((key) => {
+        const param = parseParameter(key);
+        return `${param.name}: $${param.variable}`;
+      }).join(', ');
 
-      return `${prefix} (${args.join(', ')})${cycleParse(nodes.returns!, ctx, space)}`;
+      return `${prefix} (${params})${cycleParse(nodes.returns!, ctx, space)}`;
     }
 
     // Object or Array
@@ -64,11 +59,11 @@ const cycleParse = (nodes: Definition<any, any>, ctx: ParseContext, space: numbe
       return `${prefix}${cycleParse(nodes.returns, ctx, space)}`;
     }
 
-    // normal string, number or boolean
+    // string, number or boolean
     return prefix;
   }
 
-  const newNodes = {};
+  const newNodes: Record<string, string> = {};
 
   // object
   Object.keys(nodes).forEach((key) => {
@@ -80,21 +75,20 @@ const cycleParse = (nodes: Definition<any, any>, ctx: ParseContext, space: numbe
       const fragment: FragmentMeta = node;
 
       if (fragment.inline) {
-        const extraNodes = cycleParse(fragment.definition, ctx, space + 2);
-        newNodes[key] = `... on ${fragment.on}${extraNodes}`;
+        newNodes[key] = `... on ${fragment.on}${cycleParse(fragment.definition, ctx, space + 2)}`;
       } else {
         if (!~ctx.fragmentObjs.indexOf(fragment)) {
           ctx.fragmentObjs.push(fragment);
-          ctx.fragments.push(parseFragment(fragment, ctx));
+          ctx.fragmentStrs.push(parseFragment(fragment, ctx));
         }
-        newNodes[key] = `...${fragment.tmpName || key}`;
+        newNodes[key] = `...${fragment.tmpName}`;
       }
     } else {
       newNodes[key] = cycleParse(node, ctx, space + 2);
     }
   });
 
-  return parseObject(newNodes, space + 2);
+  return render(newNodes, space + 2);
 };
 
 const parseFragment = (fragment: FragmentMeta, ctx: ParseContext): string => {
@@ -107,14 +101,14 @@ const parseFragment = (fragment: FragmentMeta, ctx: ParseContext): string => {
 };
 
 const parseParameter = (value: string) => {
-  let [alias, arg]: (string | undefined)[] = value.split(':');
+  let [alias, param]: (string | undefined)[] = value.split(':');
 
-  if (!arg) {
-    arg = alias;
+  if (!param) {
+    param = alias;
     alias = undefined;
   }
 
-  const item = arg.split('_');
+  const item = param.split('_');
 
   if (item.length < 2) {
     throw new Error(`Parmeter ${value} is invalid, try to set it like: "a_Int", "b_String", "alias:c_Int" and so on.`);
@@ -130,7 +124,7 @@ const parseParameter = (value: string) => {
   };
 };
 
-const parseObject = (nodes: Record<string, string>, space: number): string => {
+const render = (nodes: Record<string, string>, space: number): string => {
   let tpl = ` {`;
 
   Object.keys(nodes).forEach((key) => {

@@ -3,15 +3,15 @@ import { Definition } from './parse';
 
 export type Or<T, Next> = unknown extends T ? Next : Next | T;
 
-export type Parse<T> = T extends Type<infer U, any> | Base<infer U, any> ? U : {
-  [K in keyof T]: T[K] extends Type<infer U, any> | Base<infer U, any>
+export type Parse<T> = T extends Type<infer U, any> ? U : {
+  [K in keyof T]: T[K] extends Type<infer U, any>
     ? U
     : T[K] extends Definition<any, any>
       ? Parse<T[K]>
       : never;
 };
 
-type ParseJson<T> = T extends Type<infer U, any> | Base<infer U, any>
+type ParseJson<T> = T extends Type<infer U, any>
   ? U
   : T extends object
     ? {
@@ -50,12 +50,12 @@ type VarObjectParams_5<T> = {
   [K in keyof T]: T[K] extends AnyType ? VarTypeParams<T[K]> : never;
 }[keyof T];
 
-export class Base<_, __> {
-  public/*protected*/ fnArgs?: string[];
-  public/*protected*/ totalArgs?: string[];
+export class Type<T, U> {
+  public/*protected*/ fnParams?: string[];
+  public/*protected*/ totalParams?: string[];
   public/*protected*/ realName?: string;
-  public/*protected*/ includeData?: { arg: string };
-  public/*protected*/ skipData?: { arg: string };
+  public/*protected*/ includeData?: { param: string };
+  public/*protected*/ skipData?: { param: string };
   public/*protected*/ returns?: Definition<any, any>;
 
   aliasOf(realName: string): this {
@@ -65,20 +65,20 @@ export class Base<_, __> {
   }
 
   protected appendArgs(names: string[]): void {
-    this.totalArgs = this.totalArgs || [];
-    this.totalArgs.push.apply(this.totalArgs, names);
+    this.totalParams = this.totalParams || [];
+    this.totalParams.push.apply(this.totalParams, names);
   }
 
   protected clone(): this {
     // @ts-ignore
-    const that: Base<any, any> = new this.constructor();
+    const that: Type<any, any> = new this.constructor();
 
-    if (this.fnArgs) {
-      that.fnArgs = this.fnArgs.slice();
+    if (this.fnParams) {
+      that.fnParams = this.fnParams.slice();
     }
 
-    if (this.totalArgs) {
-      that.totalArgs = this.totalArgs.slice();
+    if (this.totalParams) {
+      that.totalParams = this.totalParams.slice();
     }
 
     if (this.includeData) {
@@ -95,9 +95,7 @@ export class Base<_, __> {
     // @ts-ignore
     return that;
   }
-}
 
-export class Type<T, U> extends Base<T, U> {
   get number(): Type<Or<T, number>, U> {
     return this;
   }
@@ -174,7 +172,7 @@ export class Type<T, U> extends Base<T, U> {
     const that = this.clone();
     // FIXME: 一行内是否支持多个include或者skip？
     that.includeData = {
-      arg: ifParam_Type,
+      param: ifParam_Type,
     };
     that.appendArgs([ifParam_Type]);
     return that;
@@ -196,7 +194,7 @@ export class Type<T, U> extends Base<T, U> {
   skip<P extends string>(ifParam_Type: P): Type<Or<T, undefined>, Or<U, P>> {
     const that = this.clone();
     that.skipData = {
-      arg: ifParam_Type,
+      param: ifParam_Type,
     };
     that.appendArgs([ifParam_Type]);
     return that;
@@ -206,7 +204,7 @@ export class Type<T, U> extends Base<T, U> {
    *
    * @param {String[]} params_Type
    * For example: `page_Int` | `name_String` | `focus_Boolean` | `data_MyObject`
-   * @param {BaseType} returns
+   * @param {Type} returns
    */
   fn<A extends string, B extends Definition<any, any>>(
     params_Type: A[],
@@ -214,7 +212,7 @@ export class Type<T, U> extends Base<T, U> {
     returns: B
   ): Type<Or<T, ParseJson<B>>, Or<U, A>> {
     const that = this.clone();
-    that.fnArgs = params_Type;
+    that.fnParams = params_Type;
     that.returns = returns;
     that.appendArgs(params_Type);
     return that;

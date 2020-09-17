@@ -20,11 +20,11 @@ export function query<T extends Definition<K, V>, K extends any, V extends any>(
   toString(): string;
 } {
   const ctx: ParseContext = {
-    args: [],
-    fragments: [],
+    params: [],
+    paramAlias: {},
+    fragmentStrs: [],
     fragmentObjs: [],
     fragmentIndex: {},
-    argAlias: {},
   }
 
   // @ts-ignore
@@ -35,15 +35,15 @@ export function query<T extends Definition<K, V>, K extends any, V extends any>(
 
   const fn = (variables: object) => {
     const query = getQuery();
-    const newVars = {};
+    const newArgs = {};
 
     Object.keys(variables).forEach((key) => {
-      newVars[ctx.argAlias[key]] = variables[key];
+      newArgs[ctx.paramAlias[key]] = variables[key];
     });
 
     return {
       query: query,
-      variables: newVars,
+      variables: newArgs,
     };
   };
 
