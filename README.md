@@ -36,7 +36,7 @@ const getUserTpl = graphql.query({
 // console.log(getUserTpl.toString());
 
 // 生成模板：
-// query GetUserr {
+// query GetUser {
 //   getUser {
 //     id
 //     name
@@ -84,7 +84,7 @@ const tpl = graphql.query({
 });
 
 // 生成模板：
-// query GetUserr ($page: Int, $size: Int) {
+// query GetUser ($page: Int, $size: Int) {
 //   getUser: {
 //     id
 //     logs (page: $page, size: $size) {
@@ -128,7 +128,7 @@ const tpl = graphql.query({
 });
 
 // 生成模板：
-// query GetUserr {
+// query GetUser {
 //   getUser: {
 //     id
 //     ...UserFragment
@@ -232,7 +232,7 @@ const tpl = graphql.query({
 });
 
 // 生成模板：
-// query GetUserr ($test: Boolean, $other: Boolean) {
+// query GetUser ($test: Boolean, $other: Boolean) {
 //   getUser: {
 //     id @include(if: $test)
 //     logs @skip(if: $other) {
