@@ -168,7 +168,7 @@ const preDefinedSpaces = [
 ];
 
 const addSpace = (length: number) => {
-  return preDefinedSpaces[length / 2];
+  return preDefinedSpaces[length / 2] || '';
 }
 
 const capitalize = (value: string) => {
