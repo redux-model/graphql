@@ -193,7 +193,7 @@ describe('Graphql', () => {
   it ('function parameter with alias variable', () => {
     const tpl = graphql.query({
       hello: types.number,
-      hi: types.fn(['other:a_Int'], {
+      hi: types.fn(['other:a_Int', 'b_String'], {
         how: types.undefined.string,
         are: {
           you: types.boolean,
@@ -201,10 +201,10 @@ describe('Graphql', () => {
       }),
     });
 
-    expect(tpl({ 'other:a_Int': 3 }).query).to.equal(
-`query Hello ($other: Int) {
+    expect(tpl({ 'other:a_Int': 3, b_String: '666' }).query).to.equal(
+`query Hello ($other: Int, $b: String) {
   hello
-  hi (a: $other) {
+  hi (a: $other, b: $b) {
     how
     are {
       you
@@ -212,6 +212,11 @@ describe('Graphql', () => {
   }
 }`
     );
+
+    expect(tpl({ 'other:a_Int': 3, b_String: '666' }).variables).to.contain({
+      other: 3,
+      b: '666',
+    });
   });
 
   it ('function returns boolean, number or string', () => {
@@ -487,6 +492,86 @@ fragment UserFragment on User {
   id
   name (id: $id) {
     name
+  }
+}`
+    );
+  });
+
+  it ('fragment in fragment', () => {
+    const fragment = graphql.fragment('User', {
+      id: types.number,
+      fn1: types.fn(['a_Int'], types.number),
+    });
+
+    const fragment1 = graphql.fragment('Admin', {
+      name: types.string,
+      ...fragment,
+    });
+
+    const fragment2 = graphql.fragment('Admin', {
+      age: types.number,
+      ...fragment1,
+    });
+
+    const tpl = graphql.query({
+      hello: {
+        ...fragment2,
+      },
+    });
+
+    expect(tpl({
+      a_Int: 2,
+    }).query).to.equal(
+`query Hello ($a: Int) {
+  hello {
+    ...AdminFragment
+  }
+}
+
+fragment UserFragment on User {
+  id
+  fn1 (a: $a)
+}
+
+fragment AdminFragment_1 on Admin {
+  name
+  ...UserFragment
+}
+
+fragment AdminFragment on Admin {
+  age
+  ...AdminFragment_1
+}`
+    );
+  });
+
+  it ('inline fragment in inline fragment', () => {
+    const tpl = graphql.query({
+      hello: {
+        ...types.on('User', {
+          id: types.number,
+          ...types.on('Admin', {
+            name: types.string,
+            fn1: types.fn(['b_Int'], {
+              id: types.number,
+            }),
+          }),
+        })
+      }
+    });
+
+    expect(tpl({ b_Int: 2 }).query).to.equal(
+`query Hello ($b: Int) {
+  hello {
+    ... on User {
+      id
+      ... on Admin {
+        name
+        fn1 (b: $b) {
+          id
+        }
+      }
+    }
   }
 }`
     );

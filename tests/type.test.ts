@@ -527,4 +527,77 @@ describe('Type definition', () => {
       }).variables.red_Boolean;
     });
   });
+
+  it ('fragment in fragment', () => {
+    const usreFragment = graphql.fragment('User', {
+      hello: types.number,
+      hi: types.fn(['a_Int'], types.boolean),
+      man: {
+        woman: types.number,
+      }
+    });
+
+    const adminFragment = graphql.fragment('Admin', {
+      age: types.number,
+      ...usreFragment,
+    });
+
+    const tpl = graphql.query({
+      hello: {
+        ...adminFragment,
+      }
+    });
+
+    (function() {
+      tpl({
+        a_Int: 2,
+      });
+
+      // @ts-expect-error
+      tpl({});
+
+      tpl({
+        a_Int: 2,
+        // @ts-expect-error
+        b_Int: 2,
+      });
+
+      tpl.type.hello.age.toFixed();
+      tpl.type.hello.man.woman.toFixed();
+      // @ts-expect-error
+      tpl.type.hello.man.child;
+    });
+  });
+
+  it ('inline fragment in inline fragment', () => {
+    const tpl = graphql.query({
+      hello: {
+        ...types.on('User', {
+          id: types.number,
+          ...types.on('Admin', {
+            fn1: types.fn(['a_Int'], types.number),
+          }),
+        }),
+      }
+    });
+
+    (function() {
+      tpl({
+        a_Int: 2,
+      });
+
+      // @ts-expect-error
+      tpl({});
+
+      tpl({
+        a_Int: 2,
+        // @ts-expect-error
+        b_Int: 2,
+      });
+
+      tpl.type.hello.fn1.toFixed();
+      // @ts-expect-error
+      tpl.type.hello.fn1.toLowerCase();
+    });
+  });
 });
