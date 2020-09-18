@@ -47,7 +47,7 @@ const cycleParse = (nodes: Definition, ctx: ParseContext, space: number): string
         return `${param.name}: $${param.variable}`;
       }).join(', ');
 
-      return `${prefix} (${params})${cycleParse(nodes.returns!, ctx, space)}`;
+      return `${realName} (${params})${include}${skip}${cycleParse(nodes.returns!, ctx, space)}`;
     }
 
     // Object or Array

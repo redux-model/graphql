@@ -144,7 +144,7 @@ describe('Graphql', () => {
     expect(tpl({ a_Int: 3, b_Boolean: false, c_Boolean: true }).query).to.equal(
 `query Hello ($b: Boolean, $c: Boolean, $a: Int) {
   hello @include(if: $b)
-  hi @include(if: $b) @skip(if: $c) (a: $a) {
+  hi (a: $a) @include(if: $b) @skip(if: $c) {
     how
     are {
       you
