@@ -1,5 +1,5 @@
 import { fragmentKey, FragmentMeta } from './fragment';
-import { Definition, Type } from './types';
+import { Definition, Types } from './types';
 
 export interface ParseContext {
   params: string[];
@@ -25,7 +25,7 @@ export const parse = (type: string, name: string | undefined, nodes: Definition<
 };
 
 const cycleParse = (nodes: Definition<any, any>, ctx: ParseContext, space: number): string => {
-  if (nodes instanceof Type) {
+  if (nodes instanceof Types) {
     // collect args to top
     if (nodes.totalParams) {
       nodes.totalParams.forEach((arg) => {
@@ -97,12 +97,9 @@ const parseFragment = (fragment: FragmentMeta, ctx: ParseContext): string => {
 };
 
 const parseParameter = (value: string) => {
-  let [alias, param]: (string | undefined)[] = value.split(':');
-
-  if (!param) {
-    param = alias;
-    alias = undefined;
-  }
+  const alias_param = value.split(':');
+  const param = alias_param.pop()!;
+  const alias = alias_param.pop();
 
   const item = param.split('_');
 

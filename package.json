@@ -10,9 +10,7 @@
     "test": "nyc mocha ./tests/*.test.ts -r ts-node/register",
     "prepublishOnly": "rm -rf ./build/ ./lib/ && tsc && mv ./build/src/ ./lib/ && public-refactor --src ./src --dist ./lib"
   },
-  "dependencies": {
-    "tslib": "^2.0.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chai": "^4.2.12",
     "@types/mocha": "^8.0.3",

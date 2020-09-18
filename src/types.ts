@@ -1,6 +1,6 @@
 import { createFragmentKey, FragmentMeta } from './fragment';
 
-export type Definition<K, V> = Type<K, V> | DefinitionObj<K, V>;
+export type Definition<K, V> = Types<K, V> | DefinitionObj<K, V>;
 
 type DefinitionObj<K, V> = {
   [key: string]: Definition<K, V> | undefined;
@@ -8,11 +8,11 @@ type DefinitionObj<K, V> = {
 
 export type Or<T, Next> = unknown extends T ? Next : Next | T;
 
-export type Parse<T> = T extends Type<infer U, any>
+export type Parse<T> = T extends Types<infer U, any>
   ? U
   : T extends object
     ? {
-      [K in keyof T]: T[K] extends Type<infer U, any>
+      [K in keyof T]: T[K] extends Types<infer U, any>
         ? U
         : Parse<T[K]>;
     }
@@ -20,9 +20,9 @@ export type Parse<T> = T extends Type<infer U, any>
 
 export type VarParams<T> = T extends AnyType ? VarTypeParams<T> : VarObjectParams<T>;
 
-type AnyType = Type<any, any>;
+type AnyType = Types<any, any>;
 
-type VarTypeParams<T> = T extends Type<any, infer U>
+type VarTypeParams<T> = T extends Types<any, infer U>
   ? unknown extends U
     ? never
     : U
@@ -49,7 +49,7 @@ type VarObjectParams_5<T> = {
   [K in keyof T]: T[K] extends AnyType ? VarTypeParams<T[K]> : never;
 }[keyof T];
 
-export class Type<T, U> {
+export class Types<T = unknown, U = unknown> {
   public/*protected*/ fnParams?: string[];
   public/*protected*/ totalParams?: string[];
   public/*protected*/ realName?: string;
@@ -70,7 +70,7 @@ export class Type<T, U> {
 
   protected clone(): this {
     // @ts-ignore
-    const that: Type<any, any> = new this.constructor();
+    const that: Types<any, any> = new this.constructor();
 
     if (this.fnParams) {
       that.fnParams = this.fnParams.slice();
@@ -95,27 +95,27 @@ export class Type<T, U> {
     return that;
   }
 
-  get number(): Type<Or<T, number>, U> {
+  get number(): Types<Or<T, number>, U> {
     return this;
   }
 
-  get string(): Type<Or<T, string>, U> {
+  get string(): Types<Or<T, string>, U> {
     return this;
   }
 
-  get boolean(): Type<Or<T, boolean>, U> {
+  get boolean(): Types<Or<T, boolean>, U> {
     return this;
   }
 
-  get undefined(): Type<Or<T, undefined>, U> {
+  get undefined(): Types<Or<T, undefined>, U> {
     return this;
   }
 
-  get null(): Type<Or<T, null>, U> {
+  get null(): Types<Or<T, null>, U> {
     return this;
   }
 
-  custom<T1>(): Type<Or<T, T1>, U> {
+  custom<T1>(): Types<Or<T, T1>, U> {
     return this;
   }
 
@@ -129,7 +129,7 @@ export class Type<T, U> {
    * }
    * ```
    */
-  object<T1 extends Definition<K, V>, K extends any, V extends any>(items: T1): Type<Or<T, Parse<T1>>, Or<U, VarParams<T1>>> {
+  object<T1 extends Definition<K, V>, K extends any, V extends any>(items: T1): Types<Or<T, Parse<T1>>, Or<U, VarParams<T1>>> {
     const that = this.clone();
     that.returns = items;
     return that;
@@ -148,7 +148,7 @@ export class Type<T, U> {
   array<T1 extends Definition<K, V>, K extends any, V extends any>(
     // @ts-ignore
     each: T1
-  ): Type<Or<T, Parse<T1>[]>, Or<U, VarParams<T1>>> {
+  ): Types<Or<T, Parse<T1>[]>, Or<U, VarParams<T1>>> {
     const that = this.clone();
     that.returns = each;
     return that;
@@ -167,7 +167,7 @@ export class Type<T, U> {
    * }
    * ```
    */
-  include<P extends string>(ifParam_Type: P): Type<Or<T, undefined>, Or<U, P>> {
+  include<P extends string>(ifParam_Type: P): Types<Or<T, undefined>, Or<U, P>> {
     const that = this.clone();
     // FIXME: 一行内是否支持多个include或者skip？
     that.includeData = {
@@ -190,7 +190,7 @@ export class Type<T, U> {
    * }
    * ```
    */
-  skip<P extends string>(ifParam_Type: P): Type<Or<T, undefined>, Or<U, P>> {
+  skip<P extends string>(ifParam_Type: P): Types<Or<T, undefined>, Or<U, P>> {
     const that = this.clone();
     that.skipData = {
       param: ifParam_Type,
@@ -203,21 +203,19 @@ export class Type<T, U> {
    *
    * @param {String[]} params_Type
    * For example: `page_Int` | `name_String` | `focus_Boolean` | `data_MyObject`
-   * @param {Type} returns
+   * @param {Types} returns
    */
   fn<U1 extends string, T1 extends Definition<any, any>>(
     params_Type: U1[],
     returns: T1
-  ): Type<Or<T, Parse<T1>>, Or<U, U1>> {
+  ): Types<Or<T, Parse<T1>>, Or<U, U1>> {
     const that = this.clone();
     that.fnParams = params_Type;
     that.returns = returns;
     that.appendParams(params_Type);
     return that;
   }
-}
 
-export class AdvancedType<T = unknown, U = unknown> extends Type<T, U> {
   /**
    * Inline fragment with same struct
    * ```
@@ -277,4 +275,4 @@ export class AdvancedType<T = unknown, U = unknown> extends Type<T, U> {
   }
 }
 
-export const types = new AdvancedType();
+export const types = new Types();
