@@ -36,8 +36,8 @@ const cycleParse = (nodes: Definition, ctx: ParseContext, space: number): string
     // alias
     const realName = nodes.realName ? `: ${nodes.realName}` : '';
     // directives
-    const include = nodes.includeData ? ` @include(if: $${parseParameter(nodes.includeData.param).variable})` : '';
-    const skip = nodes.skipData ? ` @skip(if: $${parseParameter(nodes.skipData.param).variable})` : '';
+    const include = nodes.includeParam ? ` @include(if: $${parseParameter(nodes.includeParam).variable})` : '';
+    const skip = nodes.skipParam ? ` @skip(if: $${parseParameter(nodes.skipParam).variable})` : '';
     const prefix = `${realName}${include}${skip}`;
 
     // function

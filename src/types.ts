@@ -53,8 +53,8 @@ export class Types<T = unknown, U = unknown> {
   public/*protected*/ fnParams?: string[];
   public/*protected*/ totalParams?: string[];
   public/*protected*/ realName?: string;
-  public/*protected*/ includeData?: { param: string };
-  public/*protected*/ skipData?: { param: string };
+  public/*protected*/ includeParam?: string;
+  public/*protected*/ skipParam?: string;
   public/*protected*/ returns?: Definition;
 
   aliasOf(realName: string): this {
@@ -80,14 +80,8 @@ export class Types<T = unknown, U = unknown> {
       that.totalParams = this.totalParams.slice();
     }
 
-    if (this.includeData) {
-      that.includeData = { ...this.includeData };
-    }
-
-    if (this.skipData) {
-      that.skipData = { ...this.skipData };
-    }
-
+    this.includeParam && (that.includeParam = this.includeParam);
+    this.skipParam && (that.skipParam = this.skipParam);
     this.realName && (that.realName = this.realName);
     this.returns && (that.returns = this.returns);
 
@@ -169,9 +163,7 @@ export class Types<T = unknown, U = unknown> {
    */
   include<P extends string>(param_Boolean: P): Types<Or<T, undefined>, Or<U, P>> {
     const that = this.clone();
-    that.includeData = {
-      param: param_Boolean,
-    };
+    that.includeParam = param_Boolean;
     that.appendParams([param_Boolean]);
     return that;
   }
@@ -191,9 +183,7 @@ export class Types<T = unknown, U = unknown> {
    */
   skip<P extends string>(param_Boolean: P): Types<Or<T, undefined>, Or<U, P>> {
     const that = this.clone();
-    that.skipData = {
-      param: param_Boolean,
-    };
+    that.skipParam = param_Boolean;
     that.appendParams([param_Boolean]);
     return that;
   }
