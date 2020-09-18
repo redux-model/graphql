@@ -151,11 +151,6 @@ const tpl = graphql.query({
     ...types.on(['Hero', 'Thief'], {
       age: types.number,
     }),
-    ...types.on({
-      Admin: {
-        title: types.string,
-      },
-    }),
   }
 });
 
@@ -172,9 +167,6 @@ const tpl = graphql.query({
 //     ... on Thief {
 //       age
 //     }
-//     ... on Admin {
-//       title
-//     }
 //   }
 // }
 ```
@@ -185,18 +177,18 @@ const tpl = graphql.query({
 const tpl = graphql.query({
   getUser: {
     id: types.number,
-    ...types.on({
-      User: {
+    ...types.union(
+      types.on('User', {
         kind: types.custom<'User'>(),
         name: types.string,
         age: types.number,
-      },
-      Admin: {
+      }),
+      types.on('Admin', {
         kind: types.custom<'Admin'>(),
         name1: types.string,
         age1: types.number,
-      },
-    }),
+      }),
+    )
   }
 });
 
@@ -227,6 +219,8 @@ if (data.kind === 'User') {
   // data.name1
 }
 ```
+
+**⚠️注意：互斥内联片段无法收集函数参数名。暂无解决方案！！**
 
 # 指令
 ```typescript

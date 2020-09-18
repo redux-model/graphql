@@ -329,18 +329,18 @@ describe('Type definition', () => {
       hello: {
         id: types.number,
         name: types.string,
-        ...types.on({
-          User: {
+        ...types.union(
+          types.on('User', {
             kind: types.custom<'User'>(),
             age: types.number,
             age1: types.number,
-          },
-          Admin: {
+          }),
+          types.on('Admin', {
             kind: types.custom<'Admin'>(),
             age: types.string.undefined,
             age2: types.number,
-          }
-        }),
+          })
+        ),
         ...types.on('User', {
           title: types.string,
         }),
@@ -357,12 +357,6 @@ describe('Type definition', () => {
       tpl.type.hello.age.toFixed();
       // @ts-expect-error
       tpl.type.hello.age.toLowerCase();
-      tpl.type.hello.age1?.toFixed();
-      // @ts-expect-error
-      tpl.type.hello.age1.toFixed();
-      tpl.type.hello.age2?.toFixed();
-      // @ts-expect-error
-      tpl.type.hello.age2.toFixed();
       tpl.type.hello.title.toLowerCase();
       tpl.type.hello.title1.toLowerCase();
       // @ts-expect-error

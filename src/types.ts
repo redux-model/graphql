@@ -222,25 +222,7 @@ export class Types<T = never, U = never> {
    * }
    * ```
    */
-  on<T1 extends DefinitionObj<K, V>, K extends any, V extends any>(on: string | string[], definition: T1): T1;
-  /**
-   * Inline fragment with different struct
-   * ```
-   * lists {
-   *   ... on User {
-   *     name1
-   *   }
-   *   ... on Admin {
-   *     name2
-   *   }
-   * }
-   * ```
-   */
-  on<T1 extends Record<string, any>>(fragments: Record<string, T1>): T1;
-  on(
-    on: string | string[] | Record<string, Definition>,
-    definition?: Definition
-  ): Record<string, FragmentMeta> {
+  on<T1 extends DefinitionObj<K, V>, K extends any, V extends any>(on: string | string[], definition: T1): T1 {
     const data: Record<string, FragmentMeta> = {};
     let fragments: Record<string, Definition> = {};
 
@@ -250,8 +232,6 @@ export class Types<T = never, U = never> {
       on.forEach((key) => {
         fragments[key] = definition!;
       });
-    } else {
-      fragments = on;
     }
 
     Object.keys(fragments).forEach((key) => {
@@ -262,6 +242,36 @@ export class Types<T = never, U = never> {
         inline: true,
         definition: fragments[key],
       };
+    });
+
+    // @ts-ignore
+    return data;
+  }
+
+  /**
+   * ```
+   * types.union(
+   *   types.on('User', {
+   *     id: types.number,
+   *     name: types.string,
+   *   }),
+   *   types.on('Admin', {
+   *     id: types.number,
+   *     name1: types.string,
+   *   }),
+   * )
+   * ```
+   */
+  union<T1, T2>(def1: T1, def2: T2): T1 | T2;
+  union<T1, T2, T3>(def1: T1, def2: T2, def3: T3): T1 | T2 | T3;
+  union<T1, T2, T3, T4>(def1: T1, def2: T2, def3: T3, def4: T4): T1 | T2 | T3 | T4;
+  union(): any {
+    const data = {};
+
+    Array.prototype.forEach.call(arguments, (item) => {
+      Object.keys(item).forEach((key) => {
+        data[key] = item[key];
+      });
     });
 
     return data;

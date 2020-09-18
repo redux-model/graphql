@@ -267,20 +267,20 @@ describe('Graphql', () => {
     const tpl = graphql.query({
       hello: types.number,
       hi: types.undefined.string,
-      ...types.on({
-        User: {
+      ...types.union(
+        types.on('User', {
           id: types.number,
           name: {
             desc: types.string,
           }
-        },
-        Admin: {
+        }),
+        types.on('Admin', {
           id: types.number,
           name1: {
             desc1: types.string,
           }
-        },
-      }),
+        }),
+      ),
       ...types.on(['User', 'Admin'], {
         id1: types.number,
         title1: types.string,
