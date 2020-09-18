@@ -14,11 +14,11 @@ export const parse = (type: string, name: string | undefined, nodes: Definition,
 
   const body = cycleParse(nodes, ctx, -2);
   const params = ctx.params.map((key) => {
-    const arg = parseParameter(key);
-    ctx.paramAlias[key] = arg.variable;
+    const param = parseParameter(key);
+    ctx.paramAlias[key] = param.variable;
 
-    return `$${arg.variable}: ${arg.type}`;
-  }).filter(Boolean);
+    return `$${param.variable}: ${param.type}`;
+  });
   const paramStr = params.length ? ` (${params.join(', ')})` : '';
 
   return `${type} ${name}${paramStr}${body}${ctx.fragmentStrs.join('')}`;
