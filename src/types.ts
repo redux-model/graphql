@@ -167,13 +167,12 @@ export class Types<T = unknown, U = unknown> {
    * }
    * ```
    */
-  include<P extends string>(ifParam_Type: P): Types<Or<T, undefined>, Or<U, P>> {
+  include<P extends string>(param_Boolean: P): Types<Or<T, undefined>, Or<U, P>> {
     const that = this.clone();
-    // FIXME: 一行内是否支持多个include或者skip？
     that.includeData = {
-      param: ifParam_Type,
+      param: param_Boolean,
     };
-    that.appendParams([ifParam_Type]);
+    that.appendParams([param_Boolean]);
     return that;
   }
 
@@ -190,12 +189,12 @@ export class Types<T = unknown, U = unknown> {
    * }
    * ```
    */
-  skip<P extends string>(ifParam_Type: P): Types<Or<T, undefined>, Or<U, P>> {
+  skip<P extends string>(param_Boolean: P): Types<Or<T, undefined>, Or<U, P>> {
     const that = this.clone();
     that.skipData = {
-      param: ifParam_Type,
+      param: param_Boolean,
     };
-    that.appendParams([ifParam_Type]);
+    that.appendParams([param_Boolean]);
     return that;
   }
 
