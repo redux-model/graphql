@@ -6,8 +6,6 @@ type DefinitionObj<K, V> = {
   [key: string]: Definition<K, V> | undefined;
 };
 
-export type Or<T, Next> = unknown extends T ? Next : Next | T;
-
 export type Parse<T> = T extends Types<infer U, any>
   ? U
   : T extends object
@@ -49,7 +47,7 @@ type VarObjectParams_5<T> = {
   [K in keyof T]: T[K] extends AnyType ? VarTypeParams<T[K]> : never;
 }[keyof T];
 
-export class Types<T = unknown, U = unknown> {
+export class Types<T = never, U = never> {
   public/*protected*/ fnParams?: string[];
   public/*protected*/ totalParams?: string[];
   public/*protected*/ realName?: string;
@@ -70,35 +68,35 @@ export class Types<T = unknown, U = unknown> {
   /**
    * Property is a number
    */
-  get number(): Types<Or<T, number>, U> {
+  get number(): Types<T | number, U> {
     return this;
   }
 
   /**
    * Property is a string
    */
-  get string(): Types<Or<T, string>, U> {
+  get string(): Types<T |  string, U> {
     return this;
   }
 
   /**
    * Property is a bool
    */
-  get boolean(): Types<Or<T, boolean>, U> {
+  get boolean(): Types<T | boolean, U> {
     return this;
   }
 
   /**
    * Property may be undefined
    */
-  get undefined(): Types<Or<T, undefined>, U> {
+  get undefined(): Types<T | undefined, U> {
     return this;
   }
 
    /**
    * Property may be null
    */
-  get null(): Types<Or<T, null>, U> {
+  get null(): Types<T | null, U> {
     return this;
   }
 
@@ -115,7 +113,7 @@ export class Types<T = unknown, U = unknown> {
    * types.custom<Gender>();
    * ```
    */
-  custom<T1>(): Types<Or<T, T1>, U> {
+  custom<T1>(): Types<T | T1, U> {
     return this;
   }
 
@@ -129,7 +127,7 @@ export class Types<T = unknown, U = unknown> {
    * }
    * ```
    */
-  object<T1 extends Definition<K, V>, K extends any, V extends any>(items: T1): Types<Or<T, Parse<T1>>, Or<U, VarParams<T1>>> {
+  object<T1 extends Definition<K, V>, K extends any, V extends any>(items: T1): Types<T | Parse<T1>, U | VarParams<T1>> {
     const that = this.clone();
     that.returns = items;
     return that;
@@ -148,7 +146,7 @@ export class Types<T = unknown, U = unknown> {
   array<T1 extends Definition<K, V>, K extends any, V extends any>(
     // @ts-ignore
     each: T1
-  ): Types<Or<T, Parse<T1>[]>, Or<U, VarParams<T1>>> {
+  ): Types<T | Parse<T1>[], U | VarParams<T1>> {
     const that = this.clone();
     that.returns = each;
     return that;
@@ -167,7 +165,7 @@ export class Types<T = unknown, U = unknown> {
    * }
    * ```
    */
-  include<P extends string>(param_Boolean: P): Types<Or<T, undefined>, Or<U, P>> {
+  include<P extends string>(param_Boolean: P): Types<T | undefined, U | P> {
     const that = this.clone();
     that.includeParam = param_Boolean;
     that.appendParams([param_Boolean]);
@@ -187,7 +185,7 @@ export class Types<T = unknown, U = unknown> {
    * }
    * ```
    */
-  skip<P extends string>(param_Boolean: P): Types<Or<T, undefined>, Or<U, P>> {
+  skip<P extends string>(param_Boolean: P): Types<T | undefined, U | P> {
     const that = this.clone();
     that.skipParam = param_Boolean;
     that.appendParams([param_Boolean]);
@@ -203,7 +201,7 @@ export class Types<T = unknown, U = unknown> {
   fn<U1 extends string, T1 extends Definition>(
     params_Type: U1[],
     returns: T1
-  ): Types<Or<T, Parse<T1>>, Or<U, U1>> {
+  ): Types<T | Parse<T1>, U | U1> {
     const that = this.clone();
     that.fnParams = params_Type;
     that.returns = returns;
