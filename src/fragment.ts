@@ -1,4 +1,4 @@
-import { Definition } from './parse';
+import { Definition } from './types';
 
 export const fragmentKey = '_###_fragment_';
 
@@ -7,7 +7,7 @@ export type FragmentMeta = {
   tmpName: string;
   on: string;
   inline: boolean;
-  definition: Record<string, Definition<any, any>>;
+  definition: Definition<any, any>;
 };
 
 let fragmentKeyIndex = 0;

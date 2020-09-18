@@ -1,21 +1,20 @@
 import { createFragmentKey, FragmentMeta } from './fragment';
-import { Definition } from './parse';
+
+export type Definition<K, V> = Type<K, V> | DefinitionObj<K, V>;
+
+type DefinitionObj<K, V> = {
+  [key: string]: Definition<K, V> | undefined;
+};
 
 export type Or<T, Next> = unknown extends T ? Next : Next | T;
 
-export type Parse<T> = T extends Type<infer U, any> ? U : {
-  [K in keyof T]: T[K] extends Type<infer U, any>
-    ? U
-    : T[K] extends Definition<any, any>
-      ? Parse<T[K]>
-      : never;
-};
-
-type ParseJson<T> = T extends Type<infer U, any>
+export type Parse<T> = T extends Type<infer U, any>
   ? U
   : T extends object
     ? {
-      [K in keyof T]: ParseJson<T[K]>;
+      [K in keyof T]: T[K] extends Type<infer U, any>
+        ? U
+        : Parse<T[K]>;
     }
     : never;
 
@@ -64,7 +63,7 @@ export class Type<T, U> {
     return that;
   }
 
-  protected appendArgs(names: string[]): void {
+  protected appendParams(names: string[]): void {
     this.totalParams = this.totalParams || [];
     this.totalParams.push.apply(this.totalParams, names);
   }
@@ -174,7 +173,7 @@ export class Type<T, U> {
     that.includeData = {
       param: ifParam_Type,
     };
-    that.appendArgs([ifParam_Type]);
+    that.appendParams([ifParam_Type]);
     return that;
   }
 
@@ -196,7 +195,7 @@ export class Type<T, U> {
     that.skipData = {
       param: ifParam_Type,
     };
-    that.appendArgs([ifParam_Type]);
+    that.appendParams([ifParam_Type]);
     return that;
   }
 
@@ -206,38 +205,63 @@ export class Type<T, U> {
    * For example: `page_Int` | `name_String` | `focus_Boolean` | `data_MyObject`
    * @param {Type} returns
    */
-  fn<A extends string, B extends Definition<any, any>>(
-    params_Type: A[],
-    // @ts-ignore
-    returns: B
-  ): Type<Or<T, ParseJson<B>>, Or<U, A>> {
+  fn<U1 extends string, T1 extends Definition<any, any>>(
+    params_Type: U1[],
+    returns: T1
+  ): Type<Or<T, Parse<T1>>, Or<U, U1>> {
     const that = this.clone();
     that.fnParams = params_Type;
     that.returns = returns;
-    that.appendArgs(params_Type);
+    that.appendParams(params_Type);
     return that;
   }
 }
 
 export class AdvancedType<T = unknown, U = unknown> extends Type<T, U> {
   /**
+   * Inline fragment with same struct
    * ```
-   * {
-   *   lists {
-   *     id
-   *     ... on User {
-   *       name
-   *       age
-   *     }
-   *     ... on Admin {
-   *       name
-   *     }
+   * lists {
+   *   ... on User {
+   *     name
+   *   }
+   *   ... on Admin {
+   *     name
    *   }
    * }
    * ```
    */
-  on<A extends Record<string, any>>(fragments: Record<string, A>): A {
+  on<T1 extends DefinitionObj<K, V>, K extends any, V extends any>(on: string | string[], definition: T1): T1;
+  /**
+   * Inline fragment with different struct
+   * ```
+   * lists {
+   *   ... on User {
+   *     name1
+   *   }
+   *   ... on Admin {
+   *     name2
+   *   }
+   * }
+   * ```
+   */
+  on<T1 extends Record<string, any>>(fragments: Record<string, T1>): T1;
+  on(
+    on: string | string[] | Record<string, Definition<any, any>>,
+    definition?: Definition<any, any>
+  ): Record<string, FragmentMeta> {
     const data: Record<string, FragmentMeta> = {};
+    let fragments: Record<string, Definition<any, any>> = {};
+
+    if (typeof on === 'string') {
+      fragments[on] = definition!;
+    } else if (Array.isArray(on)) {
+      on.forEach((key) => {
+        fragments[key] = definition!;
+      });
+    } else {
+      fragments = on;
+    }
 
     Object.keys(fragments).forEach((key) => {
       data[createFragmentKey(key)] = {
@@ -249,7 +273,6 @@ export class AdvancedType<T = unknown, U = unknown> extends Type<T, U> {
       };
     });
 
-    // @ts-ignore
     return data;
   }
 }

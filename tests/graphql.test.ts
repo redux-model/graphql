@@ -269,7 +269,21 @@ describe('Graphql', () => {
             desc: types.string,
           }
         },
-      })
+        Admin: {
+          id: types.number,
+          name1: {
+            desc1: types.string,
+          }
+        },
+      }),
+      ...types.on(['User', 'Admin'], {
+        id1: types.number,
+        title1: types.string,
+      }),
+      ...types.on('User', {
+        id2: types.number,
+        title2: types.string,
+      }),
     });
 
     expect(tpl({}).query).to.equal(
@@ -281,6 +295,24 @@ describe('Graphql', () => {
     name {
       desc
     }
+  }
+  ... on Admin {
+    id
+    name1 {
+      desc1
+    }
+  }
+  ... on User {
+    id1
+    title1
+  }
+  ... on Admin {
+    id1
+    title1
+  }
+  ... on User {
+    id2
+    title2
   }
 }`
     );

@@ -342,7 +342,13 @@ describe('Type definition', () => {
             age: types.string.undefined,
             age2: types.number,
           }
-        })
+        }),
+        ...types.on('User', {
+          title: types.string,
+        }),
+        ...types.on('User', {
+          title1: types.string,
+        }),
       },
     });
 
@@ -359,6 +365,12 @@ describe('Type definition', () => {
       tpl.type.hello.age2?.toFixed();
       // @ts-expect-error
       tpl.type.hello.age2.toFixed();
+      tpl.type.hello.title.toLowerCase();
+      tpl.type.hello.title1.toLowerCase();
+      // @ts-expect-error
+      tpl.type.hello.title.toFixed();
+      // @ts-expect-error
+      tpl.type.hello.title1.toFixed();
 
       if (tpl.type.hello.kind === 'User') {
         tpl.type.hello.age.toFixed();
@@ -431,6 +443,47 @@ describe('Type definition', () => {
       tpl({
         a_Int: 0,
         b_String: 1,
+      });
+    });
+  });
+
+  it ('inline fragment with function', () => {
+    const tpl = graphql.query({
+      ...types.on('User', {
+        fn1: types.fn(['a_Int'], types.boolean),
+      }),
+      hello: {
+        hi: {
+          ...types.on('Admin', {
+            fn2: types.fn(['b_Int'], {
+              id: types.number,
+            }),
+          })
+        }
+      }
+    });
+
+    (function () {
+      tpl({
+        a_Int: 0,
+        b_Int: 2,
+      });
+
+      // @ts-expect-error
+      tpl({
+        a_Int: 0,
+      });
+
+      // @ts-expect-error
+      tpl({
+        b_Int: 0,
+      });
+
+      tpl({
+        a_Int: 0,
+        b_Int: 0,
+        // @ts-expect-error
+        c_Int: 1,
       });
     });
   });

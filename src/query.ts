@@ -1,5 +1,5 @@
-import { Definition, parse, ParseContext } from './parse';
-import { Parse, VarParams } from './types';
+import { parse, ParseContext } from './parse';
+import { Definition, Parse, VarParams } from './types';
 
 type Variable<T> = {
   [K in VarParams<T>]: string | number | boolean | object | undefined;

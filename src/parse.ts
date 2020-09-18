@@ -1,9 +1,5 @@
 import { fragmentKey, FragmentMeta } from './fragment';
-import { Type } from './types';
-
-export type Definition<K, V> = Type<K, V> | {
-  [key: string]: Definition<K, V> | undefined;
-};
+import { Definition, Type } from './types';
 
 export interface ParseContext {
   params: string[];
