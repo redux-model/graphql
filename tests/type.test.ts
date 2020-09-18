@@ -198,8 +198,6 @@ describe('Type definition', () => {
       });
 
       query.toLowerCase();
-      variables.a_Int;
-      variables.b_String;
       // @ts-expect-error
       variables.c_WhatEver;
     });
@@ -504,7 +502,7 @@ describe('Type definition', () => {
         red_Boolean: true,
         // @ts-expect-error
         blue_Boolean: true,
-      }).variables.red_Boolean;
+      }).variables;
     });
   });
 
@@ -524,7 +522,7 @@ describe('Type definition', () => {
         red_Boolean: true,
         // @ts-expect-error
         blue_Boolean: true,
-      }).variables.red_Boolean;
+      }).variables;
     });
   });
 

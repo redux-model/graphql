@@ -10,7 +10,7 @@ type QueryThis = {
 };
 
 export type QueryReturn<T> = {
-  (variables: Variable<T>): { query: string; variables: typeof variables };
+  (variables: Variable<T>): { query: string; variables: object };
   type: Parse<T>;
   toString(): string;
 };
