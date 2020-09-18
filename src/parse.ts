@@ -104,7 +104,7 @@ const parseParameter = (value: string) => {
   const item = param.split('_');
 
   if (item.length < 2) {
-    throw new Error(`Parmeter ${value} is invalid, try to set it like: "a_Int", "b_String", "alias:c_Int" and so on.`);
+    throw new Error(`Parmeter ${value} is invalid, try to define it like: "a_Int", "b_String", "alias:c_Int" and so on.`);
   }
 
   const itemType = item.pop()!;
