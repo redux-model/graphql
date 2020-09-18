@@ -145,10 +145,11 @@ const tpl = graphql.query({
 const tpl = graphql.query({
   getUser: {
     id: types.number,
-    ...types.on({
-      User: {
-        name: types.string,
-      },
+    ...types.on('User', {
+      name: types.string,
+    }),
+    ...types.on(['Hero', 'Thief'], {
+      age: types.number,
     }),
     ...types.on({
       Admin: {
@@ -164,6 +165,12 @@ const tpl = graphql.query({
 //     id
 //     ... on User {
 //       name
+//     }
+//     ... on Hero {
+//       age
+//     }
+//     ... on Thief {
+//       age
 //     }
 //     ... on Admin {
 //       title
@@ -198,10 +205,12 @@ const tpl = graphql.query({
 //   getUser: {
 //     id
 //     ... on User {
+//       kind
 //       name
 //       age
 //     }
 //     ... on Admin {
+//       kind
 //       name1
 //       age1
 //     }
