@@ -57,58 +57,64 @@ export class Types<T = unknown, U = unknown> {
   public/*protected*/ skipParam?: string;
   public/*protected*/ returns?: Definition;
 
+  /**
+   * Set the real server property name.
+   * It means current property name is an alias.
+   */
   aliasOf(realName: string): this {
     const that = this.clone();
     that.realName = realName;
     return that;
   }
 
-  protected appendParams(names: string[]): void {
-    this.totalParams = this.totalParams || [];
-    this.totalParams.push.apply(this.totalParams, names);
-  }
-
-  protected clone(): this {
-    // @ts-ignore
-    const that: Types<any, any> = new this.constructor();
-
-    if (this.fnParams) {
-      that.fnParams = this.fnParams.slice();
-    }
-
-    if (this.totalParams) {
-      that.totalParams = this.totalParams.slice();
-    }
-
-    this.includeParam && (that.includeParam = this.includeParam);
-    this.skipParam && (that.skipParam = this.skipParam);
-    this.realName && (that.realName = this.realName);
-    this.returns && (that.returns = this.returns);
-
-    // @ts-ignore
-    return that;
-  }
-
+  /**
+   * Property is a number
+   */
   get number(): Types<Or<T, number>, U> {
     return this;
   }
 
+  /**
+   * Property is a string
+   */
   get string(): Types<Or<T, string>, U> {
     return this;
   }
 
+  /**
+   * Property is a bool
+   */
   get boolean(): Types<Or<T, boolean>, U> {
     return this;
   }
 
+  /**
+   * Property may be undefined
+   */
   get undefined(): Types<Or<T, undefined>, U> {
     return this;
   }
 
+   /**
+   * Property may be null
+   */
   get null(): Types<Or<T, null>, U> {
     return this;
   }
 
+   /**
+   * Define custom type:
+   * ```typescript
+   * types.custom<'User'>();
+   *
+   * enum Gender {
+   *   man = 'man',
+   *   woman = 'woman',
+   * }
+   *
+   * types.custom<Gender>();
+   * ```
+   */
   custom<T1>(): Types<Or<T, T1>, U> {
     return this;
   }
@@ -153,7 +159,7 @@ export class Types<T = unknown, U = unknown> {
    * {
    *   id @include (if: $varA)
    *   name
-   *   lists @include (if: $varB) {
+   *   lists (page: 1) @include (if: $varB) {
    *     id
    *     name
    *     age @include (if: $varC)
@@ -173,7 +179,7 @@ export class Types<T = unknown, U = unknown> {
    * {
    *   id @skip (if: $varA)
    *   name
-   *   lists @skip (if: $varB) {
+   *   lists (page: 1) @skip (if: $varB) {
    *     id
    *     name
    *     age @skip (if: $varC)
@@ -261,6 +267,32 @@ export class Types<T = unknown, U = unknown> {
     });
 
     return data;
+  }
+
+  protected appendParams(names: string[]): void {
+    this.totalParams = this.totalParams || [];
+    this.totalParams.push.apply(this.totalParams, names);
+  }
+
+  protected clone(): this {
+    // @ts-ignore
+    const that: Types<any, any> = new this.constructor();
+
+    if (this.fnParams) {
+      that.fnParams = this.fnParams.slice();
+    }
+
+    if (this.totalParams) {
+      that.totalParams = this.totalParams.slice();
+    }
+
+    this.includeParam && (that.includeParam = this.includeParam);
+    this.skipParam && (that.skipParam = this.skipParam);
+    this.realName && (that.realName = this.realName);
+    this.returns && (that.returns = this.returns);
+
+    // @ts-ignore
+    return that;
   }
 }
 
