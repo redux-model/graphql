@@ -9,7 +9,7 @@ export interface ParseContext {
   paramAlias: Record<string, string>,
 }
 
-export const parse = (type: string, name: string | undefined, nodes: Definition<any, any>, ctx: ParseContext): string => {
+export const parse = (type: string, name: string | undefined, nodes: Definition, ctx: ParseContext): string => {
   name = name || capitalize(Object.keys(nodes)[0] || type);
 
   const body = cycleParse(nodes, ctx, -2);
@@ -24,7 +24,7 @@ export const parse = (type: string, name: string | undefined, nodes: Definition<
   return `${type} ${name}${paramStr}${body}${ctx.fragmentStrs.join('')}`;
 };
 
-const cycleParse = (nodes: Definition<any, any>, ctx: ParseContext, space: number): string => {
+const cycleParse = (nodes: Definition, ctx: ParseContext, space: number): string => {
   if (nodes instanceof Types) {
     // collect args to top
     if (nodes.totalParams) {

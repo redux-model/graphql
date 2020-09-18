@@ -7,7 +7,7 @@ export type FragmentMeta = {
   tmpName: string;
   on: string;
   inline: boolean;
-  definition: Definition<any, any>;
+  definition: Definition;
 };
 
 let fragmentKeyIndex = 0;

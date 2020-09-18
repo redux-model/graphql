@@ -1,6 +1,6 @@
 import { createFragmentKey, FragmentMeta } from './fragment';
 
-export type Definition<K, V> = Types<K, V> | DefinitionObj<K, V>;
+export type Definition<K = any, V = any> = Types<K, V> | DefinitionObj<K, V>;
 
 type DefinitionObj<K, V> = {
   [key: string]: Definition<K, V> | undefined;
@@ -55,7 +55,7 @@ export class Types<T = unknown, U = unknown> {
   public/*protected*/ realName?: string;
   public/*protected*/ includeData?: { param: string };
   public/*protected*/ skipData?: { param: string };
-  public/*protected*/ returns?: Definition<any, any>;
+  public/*protected*/ returns?: Definition;
 
   aliasOf(realName: string): this {
     const that = this.clone();
@@ -205,7 +205,7 @@ export class Types<T = unknown, U = unknown> {
    * For example: `page_Int` | `name_String` | `focus_Boolean` | `data_MyObject`
    * @param {Types} returns
    */
-  fn<U1 extends string, T1 extends Definition<any, any>>(
+  fn<U1 extends string, T1 extends Definition>(
     params_Type: U1[],
     returns: T1
   ): Types<Or<T, Parse<T1>>, Or<U, U1>> {
@@ -245,11 +245,11 @@ export class Types<T = unknown, U = unknown> {
    */
   on<T1 extends Record<string, any>>(fragments: Record<string, T1>): T1;
   on(
-    on: string | string[] | Record<string, Definition<any, any>>,
-    definition?: Definition<any, any>
+    on: string | string[] | Record<string, Definition>,
+    definition?: Definition
   ): Record<string, FragmentMeta> {
     const data: Record<string, FragmentMeta> = {};
-    let fragments: Record<string, Definition<any, any>> = {};
+    let fragments: Record<string, Definition> = {};
 
     if (typeof on === 'string') {
       fragments[on] = definition!;
