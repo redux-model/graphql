@@ -130,30 +130,6 @@ describe('Graphql', () => {
     );
   });
 
-  it ('function query with directives', () => {
-    const tpl = graphql.query({
-      hello: types.number.include('b_Boolean'),
-      hi: types.include('b_Boolean').skip('c_Boolean').fn(['a_Int'], {
-        how: types.undefined.string,
-        are: {
-          you: types.boolean,
-        },
-      }),
-    });
-
-    expect(tpl({ a_Int: 3, b_Boolean: false, c_Boolean: true }).query).to.equal(
-`query Hello ($b: Boolean, $c: Boolean, $a: Int) {
-  hello @include(if: $b)
-  hi (a: $a) @include(if: $b) @skip(if: $c) {
-    how
-    are {
-      you
-    }
-  }
-}`
-    );
-  });
-
   it ('wrong function parameter name', () => {
     const tpl = graphql.query({
       hello: types.fn(['a'], {}),
@@ -571,6 +547,46 @@ fragment AdminFragment on Admin {
           id
         }
       }
+    }
+  }
+}`
+    );
+  });
+
+  it ('directives', () => {
+    const tpl = graphql.query({
+      hello: types.number.include('b_Boolean'),
+      hi: types.include('b_Boolean').skip('c_Boolean').fn(['a_Int'], {
+        how: types.undefined.string,
+        are: {
+          you: types.boolean,
+        },
+      }),
+      ...types.include('d_Boolean').on('User', {
+        name: types.string,
+      }),
+      ...types.include('f_Boolean').on('User', {
+        lists: {
+          id: types.number,
+        }
+      }),
+    });
+
+    expect(tpl({ a_Int: 3, b_Boolean: false, c_Boolean: true, d_Boolean: true, f_Boolean: true }).query).to.equal(
+`query Hello ($b: Boolean, $c: Boolean, $a: Int, $d: Boolean, $f: Boolean) {
+  hello @include(if: $b)
+  hi (a: $a) @include(if: $b) @skip(if: $c) {
+    how
+    are {
+      you
+    }
+  }
+  ... on User @include(if: $d) {
+    name
+  }
+  ... on User @include(if: $f) {
+    lists {
+      id
     }
   }
 }`

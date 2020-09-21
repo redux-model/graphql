@@ -4,10 +4,12 @@ export const fragmentKey = '_###_fragment_';
 
 export type FragmentMeta = {
   name: string;
-  tmpName: string;
+  tmpName?: string;
   on: string;
   inline: boolean;
   definition: Definition;
+  includeParam?: string;
+  skipParam?: string;
 };
 
 let fragmentKeyIndex = 0;
@@ -29,7 +31,6 @@ export const fragment = <T extends Record<string, Definition<K, V>>, K extends a
     [createFragmentKey(option.on)]: <FragmentMeta>{
       on: option.on,
       name: option.name,
-      tmpName: '',
       inline: false,
       definition: definition,
     }

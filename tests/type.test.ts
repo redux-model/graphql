@@ -331,12 +331,12 @@ describe('Type definition', () => {
         name: types.string,
         ...types.union(
           types.on('User', {
-            kind: types.custom<'User'>(),
+            kind1: types.number,
             age: types.number,
             age1: types.number,
           }),
           types.on('Admin', {
-            kind: types.custom<'Admin'>(),
+            kind2: types.number,
             age: types.string.undefined,
             age2: types.number,
           })
@@ -344,13 +344,31 @@ describe('Type definition', () => {
         ...types.on('User', {
           title: types.string,
         }),
-        ...types.on('User', {
+        ...types.include('m_Boolean').on('User', {
           title1: types.string,
+        }),
+        ...types.include('k_Boolean').on('Admin', {
+          lists: {
+            id: types.number,
+          },
         }),
       },
     });
 
     (function () {
+      tpl({
+        m_Boolean: true,
+        k_Boolean: true,
+      });
+
+      // @ts-expect-error
+      tpl({});
+
+      tpl({
+        // @ts-expect-error
+        abc_Boolean: true,
+      });
+
       tpl.type.hello.name.toLowerCase();
       tpl.type.hello.id.toFixed();
       // @ts-expect-error
@@ -358,20 +376,22 @@ describe('Type definition', () => {
       // @ts-expect-error
       tpl.type.hello.age.toLowerCase();
       tpl.type.hello.title.toLowerCase();
+      tpl.type.hello.title1?.toLowerCase();
+      // @ts-expect-error
       tpl.type.hello.title1.toLowerCase();
       // @ts-expect-error
       tpl.type.hello.title.toFixed();
       // @ts-expect-error
       tpl.type.hello.title1.toFixed();
 
-      if (tpl.type.hello.kind === 'User') {
+      if ('kind1' in tpl.type.hello) {
         tpl.type.hello.age.toFixed();
         tpl.type.hello.age1.toFixed();
         // @ts-expect-error
         tpl.type.hello.age2.toFixed();
       }
 
-      if (tpl.type.hello.kind === 'Admin') {
+      if ('kind2' in tpl.type.hello) {
         tpl.type.hello.age?.toLowerCase();
         // @ts-expect-error
         tpl.type.hello.age.toLowerCase();

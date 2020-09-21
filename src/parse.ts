@@ -26,19 +26,10 @@ export const parse = (type: string, name: string | undefined, nodes: Definition,
 
 const cycleParse = (nodes: Definition, ctx: ParseContext, space: number): string => {
   if (nodes instanceof Types) {
-    // collect args to top
-    if (nodes.totalParams) {
-      nodes.totalParams.forEach((arg) => {
-        ~ctx.params.indexOf(arg) || ctx.params.push(arg);
-      });
-    }
+    collectParams(nodes.totalParams, ctx);
 
-    // alias
     const realName = nodes.realName ? `: ${nodes.realName}` : '';
-    // directives
-    const include = nodes.includeParam ? ` @include(if: $${parseParameter(nodes.includeParam).variable})` : '';
-    const skip = nodes.skipParam ? ` @skip(if: $${parseParameter(nodes.skipParam).variable})` : '';
-    const prefix = `${realName}${include}${skip}`;
+    const directives = renderInclude(nodes.includeParam) + renderSkip(nodes.skipParam);
 
     // function
     if (nodes.fnParams) {
@@ -47,16 +38,16 @@ const cycleParse = (nodes: Definition, ctx: ParseContext, space: number): string
         return `${param.name}: $${param.variable}`;
       }).join(', ');
 
-      return `${realName} (${params})${include}${skip}${cycleParse(nodes.returns!, ctx, space)}`;
+      return `${realName} (${params})${directives}${cycleParse(nodes.returns!, ctx, space)}`;
     }
 
     // Object or Array
     if (nodes.returns) {
-      return `${prefix}${cycleParse(nodes.returns, ctx, space)}`;
+      return `${realName}${directives}${cycleParse(nodes.returns, ctx, space)}`;
     }
 
     // string, number or boolean
-    return prefix;
+    return realName + directives;
   }
 
   const newNodes: Record<string, string> = {};
@@ -69,15 +60,18 @@ const cycleParse = (nodes: Definition, ctx: ParseContext, space: number): string
     if (key.indexOf(fragmentKey) === 0) {
       // @ts-ignore
       const fragment: FragmentMeta = node;
+      const directives = renderInclude(fragment.includeParam) + renderSkip(fragment.skipParam);
+
+      collectParams([fragment.includeParam, fragment.skipParam], ctx);
 
       if (fragment.inline) {
-        newNodes[key] = `... on ${fragment.on}${cycleParse(fragment.definition, ctx, space + 2)}`;
+        newNodes[key] = `... on ${fragment.on}${directives}${cycleParse(fragment.definition, ctx, space + 2)}`;
       } else {
         if (!~ctx.fragmentObjs.indexOf(fragment)) {
           ctx.fragmentObjs.push(fragment);
           ctx.fragmentStrs.push(parseFragment(fragment, ctx));
         }
-        newNodes[key] = `...${fragment.tmpName}`;
+        newNodes[key] = `...${fragment.tmpName}${directives}`;
       }
     } else {
       newNodes[key] = cycleParse(node, ctx, space + 2);
@@ -139,6 +133,20 @@ const render = (nodes: Record<string, string>, space: number): string => {
   tpl += `\n${addSpace(space)}}`;
 
   return tpl;
+};
+
+const renderInclude = (param?: string) => {
+  return param ? ` @include(if: $${parseParameter(param).variable})` : '';
+};
+
+const renderSkip = (param?: string) => {
+  return param ? ` @skip(if: $${parseParameter(param).variable})` : '';
+};
+
+const collectParams = (params: (string | undefined)[] | undefined, ctx: ParseContext) => {
+  params && params.forEach((param) => {
+    param && (~ctx.params.indexOf(param) || ctx.params.push(param));
+  });
 };
 
 const preDefinedSpaces = [

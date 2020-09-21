@@ -6,6 +6,19 @@ type DefinitionObj<K, V> = {
   [key: string]: Definition<K, V> | undefined;
 };
 
+type DelegateParam<T, U, Extra> = T extends Types<infer A, infer B>
+  ? Types<A | Extra, B | U>
+  : T extends object
+    ? {
+      [K in keyof T]: T[K] extends Types<infer A, infer B>
+        ? Types<A | Extra, B | U>
+        // The struct `undefined | { xx: Types<T, U> }` is unavailable collect parameters.
+        : Extra extends undefined
+          ? Types<Parse<T[K]> | undefined, U>
+          : DelegateParam<T[K], U, never>
+    }
+    : never;
+
 export type Parse<T> = T extends Types<infer U, any>
   ? U
   : T extends object
@@ -222,7 +235,7 @@ export class Types<T = never, U = never> {
    * }
    * ```
    */
-  on<T1 extends DefinitionObj<K, V>, K extends any, V extends any>(on: string | string[], definition: T1): T1 {
+  on<T1 extends DefinitionObj<K, V>, K extends any, V extends any>(on: string | string[], definition: T1): DelegateParam<T1, U, T extends undefined ? undefined : never> {
     const data: Record<string, FragmentMeta> = {};
     let fragments: Record<string, Definition> = {};
 
@@ -237,10 +250,11 @@ export class Types<T = never, U = never> {
     Object.keys(fragments).forEach((key) => {
       data[createFragmentKey(key)] = {
         name: '',
-        tmpName: '',
         on: key,
         inline: true,
         definition: fragments[key],
+        includeParam: this.includeParam,
+        skipParam: this.skipParam,
       };
     });
 
@@ -252,19 +266,21 @@ export class Types<T = never, U = never> {
    * ```
    * types.union(
    *   types.on('User', {
-   *     id: types.number,
+   *     kind: types.custom<'User'>(),
    *     name: types.string,
    *   }),
    *   types.on('Admin', {
-   *     id: types.number,
-   *     name1: types.string,
+   *     kind: types.custom<'Admin'>(),
+   *     counter: types.string,
+   *     age: types.number,
    *   }),
+   *   ... and more
    * )
    * ```
    */
-  union<T1, T2>(def1: T1, def2: T2): T1 | T2;
-  union<T1, T2, T3>(def1: T1, def2: T2, def3: T3): T1 | T2 | T3;
-  union<T1, T2, T3, T4>(def1: T1, def2: T2, def3: T3, def4: T4): T1 | T2 | T3 | T4;
+  union<T1 extends object, T2 extends object>(def1: T1, def2: T2): T1 | T2;
+  union<T1 extends object, T2 extends object, T3 extends object>(def1: T1, def2: T2, def3: T3): T1 | T2 | T3;
+  union<T1 extends object, T2 extends object, T3 extends object, T4 extends object>(def1: T1, def2: T2, def3: T3, def4: T4): T1 | T2 | T3 | T4;
   union(): any {
     const data = {};
 
