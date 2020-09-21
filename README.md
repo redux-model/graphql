@@ -95,6 +95,12 @@ const tpl = graphql.query({
 // }
 
 // 在模型中使用
+type Response = {
+  data: typeof tpl.type;
+};
+
+type Data = Response['data'];
+
 class TestModel extends Model<Data> {
   getUser = $api.action((page: number, size: number = 10) => {
     return this
@@ -104,7 +110,7 @@ class TestModel extends Model<Data> {
         size_Int: size,
       }))
       .onSuccess((state, action) => {
-        state.list = action.response.data;
+        return action.response.data;
       });
   });
 
@@ -213,10 +219,20 @@ const tpl = graphql.query({
 您可以通过判断来确定哪个字段存在
 
 ```typescript
-if (data.kind === 'User') {
-  // data.name
-} else if (data.kind === 'Admin') {
-  // data.name1
+if (getUser.kind === 'User') {
+  // getUser.name
+  // getUser.age
+} else if (getUser.kind === 'Admin') {
+  // getUser.name1
+  // getUser.age1
+}
+
+if ('age' in getUser) {
+  // getUser.name
+  // getUser.age
+} else if ('age1' in getUser) {
+  // getUser.name1
+  // getUser.age1
 }
 ```
 
