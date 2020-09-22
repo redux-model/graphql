@@ -241,7 +241,7 @@ export class Types<T = never, U = never> {
 
     if (typeof on === 'string') {
       fragments[on] = definition!;
-    } else if (Array.isArray(on)) {
+    } else {
       on.forEach((key) => {
         fragments[key] = definition!;
       });
