@@ -235,28 +235,20 @@ export class Types<T = never, U = never> {
    * }
    * ```
    */
-  on<T1 extends TemplateObj<K, V>, K extends any, V extends any>(on: string | string[], definition: T1): DelegateParam<T1, U, T extends undefined ? undefined : never> {
+  on<T1 extends TemplateObj<K, V>, K extends any, V extends any>(on: string | string[], body: T1): DelegateParam<T1, U, T extends undefined ? undefined : never> {
     const data: Record<string, FragmentMeta> = {};
-    let fragments: Record<string, Template> = {};
+    const names = typeof on === 'string' ? [on] : on;
 
-    if (typeof on === 'string') {
-      fragments[on] = definition!;
-    } else {
-      on.forEach((key) => {
-        fragments[key] = definition!;
-      });
-    }
-
-    Object.keys(fragments).forEach((key) => {
-      data[createFragmentKey(key)] = {
+    for (let i = 0; i < names.length; ++i) {
+      data[createFragmentKey()] = {
         name: '',
-        on: key,
+        on: names[i],
         inline: true,
-        template: fragments[key],
+        template: body,
         includeParam: this.includeParam,
         skipParam: this.skipParam,
       };
-    });
+    }
 
     // @ts-ignore
     return data;

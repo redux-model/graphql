@@ -13,8 +13,8 @@ export type FragmentMeta = {
 const fragmentKey = '_#$_FRAGMENTS_$#_';
 let fragmentKeyIndex = 0;
 
-export const createFragmentKey = (on: string) => {
-  return fragmentKey + '@' + on + '@' + ++fragmentKeyIndex;
+export const createFragmentKey = () => {
+  return fragmentKey + '@' + ++fragmentKeyIndex;
 };
 
 export const isFragment = (key: string) => {
@@ -31,7 +31,7 @@ export const fragment = <T extends TemplateObj<K, V>, K extends any, V extends a
 
   // @ts-ignore
   return {
-    [createFragmentKey(option.on)]: <FragmentMeta>{
+    [createFragmentKey()]: <FragmentMeta>{
       on: option.on,
       name: option.name,
       inline: false,
