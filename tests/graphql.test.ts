@@ -115,10 +115,11 @@ describe('Graphql', () => {
           you: types.boolean,
         },
       }),
+      body: types.fn(['b_Int'], types.boolean).include('c_Boolean'),
     });
 
-    expect(tpl({ a_Int: 3 }).query).to.equal(
-`query Hello ($a: Int) {
+    expect(tpl({ a_Int: 3, b_Int: 3, c_Boolean: true }).query).to.equal(
+`query Hello ($a: Int, $b: Int, $c: Boolean) {
   hello
   hi (a: $a) {
     how
@@ -126,6 +127,7 @@ describe('Graphql', () => {
       you
     }
   }
+  body (b: $b) @include(if: $c)
 }`
     );
   });
@@ -589,6 +591,20 @@ fragment AdminFragment on Admin {
       id
     }
   }
+}`
+    );
+  });
+
+  it ('template with custom name', () => {
+    const tpl = graphql.mutation({
+      id: types.number,
+    }, {
+      name: 'CustomMutation',
+    });
+
+    expect(tpl.toString()).to.equal(
+`mutation CustomMutation {
+  id
 }`
     );
   });
