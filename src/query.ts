@@ -1,5 +1,5 @@
 import { parse, ParseContext } from './parse';
-import { Definition, Parse, VarParams } from './types';
+import { TemplateObj, Parse, VarParams } from './types';
 
 type Variable<T> = {
   [K in VarParams<T>]: string | number | boolean | object | undefined;
@@ -21,8 +21,8 @@ export const createContext = (type: string): typeof query => {
   });
 };
 
-export function query<T extends Definition<K, V>, K extends any, V extends any>(
-  tpl: T, options?: { name?: string }
+export function query<T extends TemplateObj<K, V>, K extends any, V extends any>(
+  template: T, options?: { name?: string }
 ): QueryReturn<T> {
   const ctx: ParseContext = {
     params: [],
@@ -35,7 +35,7 @@ export function query<T extends Definition<K, V>, K extends any, V extends any>(
   // @ts-ignore
   const type = (this as QueryThis).type;
   let lazyQuery: string | undefined;
-  const getQuery = () => lazyQuery || (lazyQuery = parse(type, options && options.name, tpl, ctx));
+  const getQuery = () => lazyQuery || (lazyQuery = parse(type, options && options.name, template, ctx));
 
   const fn = (variables: object) => {
     const query = getQuery();

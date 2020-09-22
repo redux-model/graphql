@@ -1,21 +1,24 @@
-import { Definition } from './types';
-
-export const fragmentKey = '_###_fragment_';
+import { Template, TemplateObj } from './types';
 
 export type FragmentMeta = {
   name: string;
   tmpName?: string;
   on: string;
   inline: boolean;
-  definition: Definition;
+  template: Template;
   includeParam?: string;
   skipParam?: string;
 };
 
+const fragmentKey = '_#$_FRAGMENTS_$#_';
 let fragmentKeyIndex = 0;
 
 export const createFragmentKey = (on: string) => {
-  return fragmentKey + on + '@' + ++fragmentKeyIndex;
+  return fragmentKey + '@' + on + '@' + ++fragmentKeyIndex;
+};
+
+export const isFragment = (key: string) => {
+  return key.indexOf(fragmentKey) === 0;
 };
 
 export interface Option {
@@ -23,7 +26,7 @@ export interface Option {
   name: string;
 }
 
-export const fragment = <T extends Record<string, Definition<K, V>>, K extends any, V extends any>(on: string | Option, definition: T): T => {
+export const fragment = <T extends TemplateObj<K, V>, K extends any, V extends any>(on: string | Option, nodes: T): T => {
   const option: Option = typeof on === 'string' ? { name: '', on } : on;
 
   // @ts-ignore
@@ -32,7 +35,7 @@ export const fragment = <T extends Record<string, Definition<K, V>>, K extends a
       on: option.on,
       name: option.name,
       inline: false,
-      definition: definition,
+      template: nodes,
     }
   };
 };

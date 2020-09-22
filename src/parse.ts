@@ -1,5 +1,5 @@
-import { fragmentKey, FragmentMeta } from './fragment';
-import { Definition, Types } from './types';
+import { FragmentMeta, isFragment } from './fragment';
+import { Template, Types } from './types';
 
 export interface ParseContext {
   params: string[];
@@ -9,7 +9,7 @@ export interface ParseContext {
   paramAlias: Record<string, string>,
 }
 
-export const parse = (type: string, name: string | undefined, nodes: Definition, ctx: ParseContext): string => {
+export const parse = (type: string, name: string | undefined, nodes: Template, ctx: ParseContext): string => {
   name = name || capitalize(Object.keys(nodes)[0] || type);
 
   const body = cycleParse(nodes, ctx, -2);
@@ -24,7 +24,7 @@ export const parse = (type: string, name: string | undefined, nodes: Definition,
   return `${type} ${name}${paramStr}${body}${ctx.fragmentStrs.join('')}`;
 };
 
-const cycleParse = (nodes: Definition, ctx: ParseContext, space: number): string => {
+const cycleParse = (nodes: Template, ctx: ParseContext, space: number): string => {
   if (nodes instanceof Types) {
     collectParams(nodes.totalParams, ctx);
 
@@ -57,7 +57,7 @@ const cycleParse = (nodes: Definition, ctx: ParseContext, space: number): string
     const node = nodes[key]!;
 
     // fragment
-    if (key.indexOf(fragmentKey) === 0) {
+    if (isFragment(key)) {
       // @ts-ignore
       const fragment: FragmentMeta = node;
       const directives = renderInclude(fragment.includeParam) + renderSkip(fragment.skipParam);
@@ -65,7 +65,7 @@ const cycleParse = (nodes: Definition, ctx: ParseContext, space: number): string
       collectParams([fragment.includeParam, fragment.skipParam], ctx);
 
       if (fragment.inline) {
-        newNodes[key] = `... on ${fragment.on}${directives}${cycleParse(fragment.definition, ctx, space + 2)}`;
+        newNodes[key] = `... on ${fragment.on}${directives}${cycleParse(fragment.template, ctx, space + 2)}`;
       } else {
         if (!~ctx.fragmentObjs.indexOf(fragment)) {
           ctx.fragmentObjs.push(fragment);
@@ -87,7 +87,7 @@ const parseFragment = (fragment: FragmentMeta, ctx: ParseContext): string => {
   const suffix = index === 0 ? '' : `_${index}`;
   fragment.tmpName = fragment.name || `${fragment.on}Fragment${suffix}`;
 
-  return `\n\nfragment ${fragment.tmpName} on ${fragment.on}${cycleParse(fragment.definition, ctx, -2)}`;
+  return `\n\nfragment ${fragment.tmpName} on ${fragment.on}${cycleParse(fragment.template, ctx, -2)}`;
 };
 
 const parseParameter = (value: string) => {
@@ -122,7 +122,7 @@ const render = (nodes: Record<string, string>, space: number): string => {
       return;
     }
 
-    if (~key.indexOf(fragmentKey)) {
+    if (isFragment(key)) {
       tpl += `\n${addSpace(space + 2)}${node}`;
       return;
     }

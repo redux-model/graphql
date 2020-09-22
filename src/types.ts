@@ -1,9 +1,9 @@
 import { createFragmentKey, FragmentMeta } from './fragment';
 
-export type Definition<K = any, V = any> = Types<K, V> | DefinitionObj<K, V>;
+export type Template<K = any, V = any> = Types<K, V> | TemplateObj<K, V>;
 
-type DefinitionObj<K, V> = {
-  [key: string]: Definition<K, V> | undefined;
+export type TemplateObj<K = any, V = any> = {
+  [key: string]: Template<K, V> | undefined;
 };
 
 type DelegateParam<T, U, Extra> = T extends Types<infer A, infer B>
@@ -66,7 +66,7 @@ export class Types<T = never, U = never> {
   public/*protected*/ realName?: string;
   public/*protected*/ includeParam?: string;
   public/*protected*/ skipParam?: string;
-  public/*protected*/ returns?: Definition;
+  public/*protected*/ returns?: Template;
 
   /**
    * Set the real server property name.
@@ -140,7 +140,7 @@ export class Types<T = never, U = never> {
    * }
    * ```
    */
-  object<T1 extends Definition<K, V>, K extends any, V extends any>(items: T1): Types<T | Parse<T1>, U | VarParams<T1>> {
+  object<T1 extends Template<K, V>, K extends any, V extends any>(items: T1): Types<T | Parse<T1>, U | VarParams<T1>> {
     const that = this.clone();
     that.returns = items;
     return that;
@@ -156,7 +156,7 @@ export class Types<T = never, U = never> {
    * }
    * ```
    */
-  array<T1 extends Definition<K, V>, K extends any, V extends any>(
+  array<T1 extends Template<K, V>, K extends any, V extends any>(
     // @ts-ignore
     each: T1
   ): Types<T | Parse<T1>[], U | VarParams<T1>> {
@@ -211,7 +211,7 @@ export class Types<T = never, U = never> {
    * For example: `page_Int` | `name_String` | `focus_Boolean` | `data_MyObject`
    * @param {Types} returns
    */
-  fn<U1 extends string, T1 extends Definition>(
+  fn<U1 extends string, T1 extends Template>(
     params_Type: U1[],
     returns: T1
   ): Types<T | Parse<T1>, U | U1> {
@@ -235,9 +235,9 @@ export class Types<T = never, U = never> {
    * }
    * ```
    */
-  on<T1 extends DefinitionObj<K, V>, K extends any, V extends any>(on: string | string[], definition: T1): DelegateParam<T1, U, T extends undefined ? undefined : never> {
+  on<T1 extends TemplateObj<K, V>, K extends any, V extends any>(on: string | string[], definition: T1): DelegateParam<T1, U, T extends undefined ? undefined : never> {
     const data: Record<string, FragmentMeta> = {};
-    let fragments: Record<string, Definition> = {};
+    let fragments: Record<string, Template> = {};
 
     if (typeof on === 'string') {
       fragments[on] = definition!;
@@ -252,7 +252,7 @@ export class Types<T = never, U = never> {
         name: '',
         on: key,
         inline: true,
-        definition: fragments[key],
+        template: fragments[key],
         includeParam: this.includeParam,
         skipParam: this.skipParam,
       };

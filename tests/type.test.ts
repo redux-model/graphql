@@ -612,4 +612,16 @@ describe('Type definition', () => {
       tpl.type.hello.fn1.toLowerCase();
     });
   });
+
+  it ('top level must be plain object', () => {
+    (function() {
+      graphql.query({});
+      // @ts-expect-error
+      graphql.query(types.number);
+      // @ts-expect-error
+      graphql.query(types.boolean.number);
+      // @ts-expect-error
+      graphql.query(types.object({}));
+    });
+  });
 });
