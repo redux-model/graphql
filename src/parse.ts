@@ -1,5 +1,5 @@
 import { FragmentMeta, isFragment } from './fragment';
-import { Template, Types } from './types';
+import { Template, TemplateObj, Types } from './types';
 
 export interface ParseContext {
   params: string[];
@@ -9,8 +9,8 @@ export interface ParseContext {
   paramAlias: Record<string, string>,
 }
 
-export const parse = (type: string, name: string | undefined, nodes: Template, ctx: ParseContext): string => {
-  name = name || capitalize(Object.keys(nodes)[0] || type);
+export const parse = (type: string, name: string | undefined, nodes: TemplateObj, ctx: ParseContext): string => {
+  name = name || capitalize(Object.keys(nodes)[0]);
 
   const body = cycleParse(nodes, ctx, -2);
   const params = ctx.params.map((key) => {
