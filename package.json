@@ -1,6 +1,6 @@
 {
   "name": "@redux-model/graphql",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "main": "lib/index.js",
   "module": "es/index.js",
   "typings": "lib/index.d.ts",
@@ -9,7 +9,7 @@
   "license": "MIT",
   "scripts": {
     "test": "nyc mocha ./tests/*.test.ts -r ts-node/register",
-    "prepublishOnly": "rm -rf ./build/ ./lib/ && tsc && mv ./build/src/ ./lib/ && public-refactor --src ./src --dist ./lib"
+    "prepublishOnly": "sh ./scripts/prepublish.sh"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",
