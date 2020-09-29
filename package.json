@@ -30,6 +30,7 @@
     "lib",
     "es",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "package.json"
   ]
 }
