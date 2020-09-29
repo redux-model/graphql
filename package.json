@@ -2,6 +2,7 @@
   "name": "@redux-model/graphql",
   "version": "0.2.1",
   "main": "lib/index.js",
+  "module": "es/index.js",
   "typings": "lib/index.d.ts",
   "repository": "git@github.com:redux-model/graph.git",
   "author": "范文华 <531362022@qq.com>",
@@ -27,6 +28,7 @@
   },
   "files": [
     "lib",
+    "es",
     "README.md",
     "LICENSE"
   ]
