@@ -180,7 +180,7 @@ describe('Type definition', () => {
 
   it ('function ()=> object', () => {
     const tpl = graphql.query({
-      hello: types.fn(['a_Int', 'b_String'], {
+      hello: types.fn(['a: Int', 'b:String'], {
         id: types.number,
       }),
     });
@@ -191,8 +191,8 @@ describe('Type definition', () => {
       tpl.type.hello.notExist;
 
       const { query, variables } = tpl({
-        a_Int: 1,
-        b_String: 2,
+        a: 1,
+        b: '2',
         // @ts-expect-error
         c_WhatEver: 3,
       });
@@ -205,10 +205,15 @@ describe('Type definition', () => {
 
   it ('function ()=> number', () => {
     const tpl = graphql.query({
-      hello: types.fn(['a_Int!', 'b_String'], types.number),
+      hello: types.fn(['a:Int!', 'b:String'], types.number),
     });
 
     (function () {
+      tpl({
+        a: 1,
+        // @ts-expect-error
+        b: 2,
+      });
       tpl.type.hello.toFixed();
     });
   });
@@ -247,79 +252,79 @@ describe('Type definition', () => {
   it ('deep level function', () => {
     const tpl = graphql.query({
       hello: {
-        name: types.fn(['a_Int'], types.boolean),
+        name: types.fn(['a: Int'], types.boolean),
         world: {
-          end: types.fn(['a1_Int'], types.boolean),
+          end: types.fn(['a1: Int'], types.boolean),
         }
       },
       hi: types.object({
-        name: types.fn(['b_Int'], types.boolean),
+        name: types.fn(['b: Int'], types.boolean),
       }),
       how: types.array({
-        name: types.fn(['c_Int'], types.boolean),
+        name: types.fn(['c: Int'], types.boolean),
       }),
       are: types.array(types.object({
-        name: types.fn(['d_Int'], types.boolean),
+        name: types.fn(['d: Int'], types.boolean),
       })),
     });
 
     (function() {
       tpl({
-        a_Int: 2,
-        a1_Int: 3,
-        b_Int: 2,
-        c_Int: 2,
-        d_Int: 2,
+        a: 2,
+        a1: 3,
+        b: 2,
+        c: 2,
+        d: 2,
       });
 
       tpl({
-        a_Int: 2,
-        a1_Int: 3,
-        b_Int: 2,
-        c_Int: 2,
-        d_Int: 2,
+        a: 2,
+        a1: 3,
+        b: 2,
+        c: 2,
+        d: 2,
         // @ts-expect-error
         not_exist: 4,
       });
 
       // @ts-expect-error
       tpl({
-        a1_Int: 3,
-        b_Int: 2,
-        c_Int: 2,
-        d_Int: 2,
+        a1: 3,
+        b: 2,
+        c: 2,
+        d: 2,
       });
 
       // @ts-expect-error
       tpl({
-        a_Int: 3,
-        b_Int: 2,
-        c_Int: 2,
-        d_Int: 2,
+        a: 3,
+        b: 2,
+        c: 2,
+        d: 2,
       });
 
       // @ts-expect-error
       tpl({
-        a_Int: 3,
-        a1_Int: 3,
-        c_Int: 2,
-        d_Int: 2,
+        a: 3,
+        a1: 3,
+        c: 2,
+        d: 2,
       });
 
       // @ts-expect-error
       tpl({
-        a_Int: 3,
-        a1_Int: 3,
-        b_Int: 2,
-        d_Int: 2,
+        a: 3,
+        a1: 3,
+        b: 2,
+        d: 2,
       });
 
       // @ts-expect-error
       tpl({
-        a_Int: 3,
-        a1_Int: 3,
-        b_Int: 2,
-        c_Int: 2,
+        a: 3,
+        a1: 3,
+        b: 2,
+        c: 2,
       });
     });
   });
@@ -344,10 +349,10 @@ describe('Type definition', () => {
         ...types.on('User', {
           title: types.string,
         }),
-        ...types.include('m_Boolean').on('User', {
+        ...types.include('m: Boolean').on('User', {
           title1: types.string,
         }),
-        ...types.include('k_Boolean').on('Admin', {
+        ...types.include('k: Boolean').on('Admin', {
           lists: {
             id: types.number,
           },
@@ -357,8 +362,8 @@ describe('Type definition', () => {
 
     (function () {
       tpl({
-        m_Boolean: true,
-        k_Boolean: true,
+        m: true,
+        k: true,
       });
 
       // @ts-expect-error
@@ -418,7 +423,8 @@ describe('Type definition', () => {
     const tpl = graphql.query({
       id: types.number,
       ...usreFragment,
-      list: types.fn(['id_Int'], {
+      list: types.fn(['id: Int'], {
+        // @ts-expect-error
         id: types.string.include(''),
         ...usreFragment,
         ...adminFragment,
@@ -438,14 +444,14 @@ describe('Type definition', () => {
 
   it ('fragment with function', () => {
     const fragment = graphql.fragment('Admin', {
-      list: types.fn(['a_Int'], {
+      list: types.fn(['a: Int'], {
         id: types.number,
         name: types.string,
       }),
     });
 
     const tpl = graphql.query({
-      result: types.fn(['b_String'], {
+      result: types.fn(['b:String'], {
         id: types.number,
       }),
       ...fragment
@@ -453,8 +459,14 @@ describe('Type definition', () => {
 
     (function () {
       tpl({
-        a_Int: 0,
-        b_String: 1,
+        a: 0,
+        b: '1',
+      });
+
+      tpl({
+        a: 0,
+        // @ts-expect-error
+        b: 1,
       });
     });
   });
@@ -462,12 +474,12 @@ describe('Type definition', () => {
   it ('inline fragment with function', () => {
     const tpl = graphql.query({
       ...types.on('User', {
-        fn1: types.fn(['a_Int'], types.boolean),
+        fn1: types.fn(['a: Int'], types.boolean),
       }),
       hello: {
         hi: {
           ...types.on('Admin', {
-            fn2: types.fn(['b_Int'], {
+            fn2: types.fn(['b: Int'], {
               id: types.number,
             }),
           })
@@ -477,32 +489,32 @@ describe('Type definition', () => {
 
     (function () {
       tpl({
-        a_Int: 0,
-        b_Int: 2,
+        a: 0,
+        b: 2,
       });
 
       // @ts-expect-error
       tpl({
-        a_Int: 0,
+        a: 0,
       });
 
       // @ts-expect-error
       tpl({
-        b_Int: 0,
+        b: 0,
       });
 
       tpl({
-        a_Int: 0,
-        b_Int: 0,
+        a: 0,
+        b: 0,
         // @ts-expect-error
-        c_Int: 1,
+        c: 1,
       });
     });
   });
 
   it ('include', () => {
     const tpl = graphql.query({
-      hello: types.number.include('red_Boolean'),
+      hello: types.number.include('red: Boolean'),
       hi: types.string,
     });
 
@@ -513,7 +525,7 @@ describe('Type definition', () => {
       tpl.type.hi.toLowerCase();
 
       tpl({
-        red_Boolean: true,
+        red: true,
         // @ts-expect-error
         blue_Boolean: true,
       }).variables;
@@ -522,7 +534,7 @@ describe('Type definition', () => {
 
   it ('skip', () => {
     const tpl = graphql.query({
-      hello: types.number.skip('red_Boolean'),
+      hello: types.number.skip('red: Boolean'),
       hi: types.string,
     });
 
@@ -533,9 +545,9 @@ describe('Type definition', () => {
       tpl.type.hi.toLowerCase();
 
       tpl({
-        red_Boolean: true,
+        red: true,
         // @ts-expect-error
-        blue_Boolean: true,
+        blue: true,
       }).variables;
     });
   });
@@ -543,7 +555,7 @@ describe('Type definition', () => {
   it ('fragment in fragment', () => {
     const usreFragment = graphql.fragment('User', {
       hello: types.number,
-      hi: types.fn(['a_Int'], types.boolean),
+      hi: types.fn(['a: Int'], types.boolean),
       man: {
         woman: types.number,
       }
@@ -562,16 +574,16 @@ describe('Type definition', () => {
 
     (function() {
       tpl({
-        a_Int: 2,
+        a: 2,
       });
 
       // @ts-expect-error
       tpl({});
 
       tpl({
-        a_Int: 2,
+        a: 2,
         // @ts-expect-error
-        b_Int: 2,
+        b: 2,
       });
 
       tpl.type.hello.age.toFixed();
@@ -587,7 +599,7 @@ describe('Type definition', () => {
         ...types.on('User', {
           id: types.number,
           ...types.on('Admin', {
-            fn1: types.fn(['a_Int'], types.number),
+            fn1: types.fn(['a: Int'], types.number),
           }),
         }),
       }
@@ -595,16 +607,16 @@ describe('Type definition', () => {
 
     (function() {
       tpl({
-        a_Int: 2,
+        a: 2,
       });
 
       // @ts-expect-error
       tpl({});
 
       tpl({
-        a_Int: 2,
+        a: 2,
         // @ts-expect-error
-        b_Int: 2,
+        b: 2,
       });
 
       tpl.type.hello.fn1.toFixed();
@@ -623,5 +635,67 @@ describe('Type definition', () => {
       // @ts-expect-error
       graphql.query(types.object({}));
     });
+  });
+
+  it ('custom param type', () => {
+    const tpl = graphql.query({
+      hello: types.fn(['a: MyType', 'b: [MyType!]!'], {
+        id: types.number,
+        name: types.string,
+      }),
+    });
+
+    (function() {
+      tpl({
+        a: 'xxx',
+        b: [{ xxx: 'yy' }],
+      });
+
+      tpl({
+        a: 2222,
+        b: [false],
+      });
+
+      tpl({
+        a: 2222,
+        // @ts-expect-error
+        b: false,
+      });
+
+      // @ts-expect-error
+      tpl({
+        a: 2222,
+      });
+    });
+  });
+
+  it ('params with alias', () => {
+    const tpl = graphql.query({
+      hello: types.fn(['a as aaa : MyType', 'b as bbb : [MyType!]!', 'c as CCc : Boolean'], {
+        id: types.number,
+        name: types.string,
+      }),
+    });
+
+    (() => {
+      tpl({
+        aaa: 2,
+        bbb: [3],
+        CCc: true,
+      });
+
+      tpl({
+        aaa: '4',
+        bbb: [],
+        CCc: false,
+      });
+
+      tpl({
+        aaa: '4',
+        bbb: [],
+        // @ts-expect-error
+        CCc: 'false',
+      });
+    })();
   });
 });

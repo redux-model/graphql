@@ -109,17 +109,17 @@ describe('Graphql', () => {
   it ('function query', () => {
     const tpl = graphql.query({
       hello: types.number,
-      hi: types.fn(['a_Int'], {
+      hi: types.fn(['a: Int!'], {
         how: types.undefined.string,
         are: {
           you: types.boolean,
         },
       }),
-      body: types.fn(['b_Int'], types.boolean).include('c_Boolean'),
+      body: types.fn(['b: Int'], types.boolean).include('c: Boolean'),
     });
 
-    expect(tpl({ a_Int: 3, b_Int: 3, c_Boolean: true }).query).to.equal(
-`query Hello ($a: Int, $b: Int, $c: Boolean) {
+    expect(tpl({ a: 3, b: 3, c: true }).query).to.equal(
+`query Hello ($a: Int!, $b: Int, $c: Boolean) {
   hello
   hi (a: $a) {
     how
@@ -134,6 +134,7 @@ describe('Graphql', () => {
 
   it ('wrong function parameter name', () => {
     const tpl = graphql.query({
+      // @ts-expect-error
       hello: types.fn(['a'], {}),
     });
 
@@ -142,10 +143,10 @@ describe('Graphql', () => {
 
   it ('function with duplicate parameter', () => {
     const tpl = graphql.query({
-      hello:  types.fn(['a_Int', 'b_String'], {
+      hello:  types.fn(['a: Int', 'b: String'], {
         id: types.number,
       }),
-      hi: types.fn(['a_Int', 'b_String'], {
+      hi: types.fn(['a: Int', 'b: String'], {
         how: types.undefined.string,
         are: {
           you: types.boolean,
@@ -153,7 +154,7 @@ describe('Graphql', () => {
       }),
     });
 
-    expect(tpl({ a_Int: 3, b_String: '2' }).query).to.equal(
+    expect(tpl({ a: 3, b: '2' }).query).to.equal(
 `query Hello ($a: Int, $b: String) {
   hello (a: $a, b: $b) {
     id
@@ -171,7 +172,7 @@ describe('Graphql', () => {
   it ('function parameter with alias variable', () => {
     const tpl = graphql.query({
       hello: types.number,
-      hi: types.fn(['other:a_Int', 'b_String'], {
+      hi: types.fn(['a as other: Int', 'b: String'], {
         how: types.undefined.string,
         are: {
           you: types.boolean,
@@ -179,7 +180,7 @@ describe('Graphql', () => {
       }),
     });
 
-    expect(tpl({ 'other:a_Int': 3, b_String: '666' }).query).to.equal(
+    expect(tpl({ other: 3, b: '666' }).query).to.equal(
 `query Hello ($other: Int, $b: String) {
   hello
   hi (a: $other, b: $b) {
@@ -191,7 +192,7 @@ describe('Graphql', () => {
 }`
     );
 
-    expect(tpl({ 'other:a_Int': 3, b_String: '666' }).variables).to.contain({
+    expect(tpl({ other: 3, b: '666' }).variables).to.contain({
       other: 3,
       b: '666',
     });
@@ -199,13 +200,13 @@ describe('Graphql', () => {
 
   it ('function returns boolean, number or string', () => {
     const tpl = graphql.query({
-      hello: types.fn(['a_Int'], types.boolean),
-      hi: types.fn(['a_Int'], types.number),
-      how: types.fn(['a_Int'], types.string),
-      are: types.fn(['a_Int'], types.number.string.undefined.null),
+      hello: types.fn(['a: Int'], types.boolean),
+      hi: types.fn(['a: Int'], types.number),
+      how: types.fn(['a: Int'], types.string),
+      are: types.fn(['a: Int'], types.number.string.undefined.null),
     });
 
-    expect(tpl({ a_Int: 3 }).query).to.equal(
+    expect(tpl({ a: 3 }).query).to.equal(
 `query Hello ($a: Int) {
   hello (a: $a)
   hi (a: $a)
@@ -222,12 +223,12 @@ describe('Graphql', () => {
       how: types.aliasOf('who').object({
         are: types.boolean,
       }),
-      list: types.aliasOf('result').fn(['a_Int'], {
+      list: types.aliasOf('result').fn(['a: Int'], {
         id: types.number,
       }),
     });
 
-    expect(tpl({ a_Int: 0 }).query).to.equal(
+    expect(tpl({ a: 0 }).query).to.equal(
 `query Hello ($a: Int) {
   hello: h
   hi: hii
@@ -442,7 +443,7 @@ fragment customUserFragment on User {
   it ('fragment includes function', () => {
     const fragment = graphql.fragment('User', {
       id: types.number,
-      name: types.fn(['id_Int'], {
+      name: types.fn(['id: Int'], {
         name: types.string,
       }),
     });
@@ -456,7 +457,7 @@ fragment customUserFragment on User {
       }
     });
 
-    expect(tpl({ id_Int: 0 }).query).to.equal(
+    expect(tpl({ id: 0 }).query).to.equal(
 `query Hello ($id: Int) {
   hello
   hi
@@ -478,7 +479,7 @@ fragment UserFragment on User {
   it ('fragment in fragment', () => {
     const fragment = graphql.fragment('User', {
       id: types.number,
-      fn1: types.fn(['a_Int'], types.number),
+      fn1: types.fn(['a: Int'], types.number),
     });
 
     const fragment1 = graphql.fragment('Admin', {
@@ -498,7 +499,7 @@ fragment UserFragment on User {
     });
 
     expect(tpl({
-      a_Int: 2,
+      a: 2,
     }).query).to.equal(
 `query Hello ($a: Int) {
   hello {
@@ -530,7 +531,7 @@ fragment AdminFragment on Admin {
           id: types.number,
           ...types.on('Admin', {
             name: types.string,
-            fn1: types.fn(['b_Int'], {
+            fn1: types.fn(['b: Int'], {
               id: types.number,
             }),
           }),
@@ -538,7 +539,7 @@ fragment AdminFragment on Admin {
       }
     });
 
-    expect(tpl({ b_Int: 2 }).query).to.equal(
+    expect(tpl({ b: 2 }).query).to.equal(
 `query Hello ($b: Int) {
   hello {
     ... on User {
@@ -557,24 +558,24 @@ fragment AdminFragment on Admin {
 
   it ('directives', () => {
     const tpl = graphql.query({
-      hello: types.number.include('b_Boolean'),
-      hi: types.include('b_Boolean').skip('c_Boolean').fn(['a_Int'], {
+      hello: types.number.include('b:Boolean'),
+      hi: types.include('b:Boolean').skip('c:Boolean').fn(['a: Int'], {
         how: types.undefined.string,
         are: {
           you: types.boolean,
         },
       }),
-      ...types.include('d_Boolean').on('User', {
+      ...types.include('d:Boolean').on('User', {
         name: types.string,
       }),
-      ...types.include('f_Boolean').on('User', {
+      ...types.include('f:Boolean').on('User', {
         lists: {
           id: types.number,
         }
       }),
     });
 
-    expect(tpl({ a_Int: 3, b_Boolean: false, c_Boolean: true, d_Boolean: true, f_Boolean: true }).query).to.equal(
+    expect(tpl({ a: 3, b: false, c: true, d: true, f: true }).query).to.equal(
 `query Hello ($b: Boolean, $c: Boolean, $a: Int, $d: Boolean, $f: Boolean) {
   hello @include(if: $b)
   hi (a: $a) @include(if: $b) @skip(if: $c) {

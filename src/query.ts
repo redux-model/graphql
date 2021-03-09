@@ -1,8 +1,39 @@
 import { parse, ParseContext } from './parse';
 import { TemplateObj, Parse, VarParams } from './types';
 
-type Variable<T> = {
-  [K in VarParams<T>]: string | number | boolean | object | undefined;
+export type Space = '' | ' ';
+export type Suffix = '!' | '';
+type AliasName<T> = T extends `${string} as ${infer R}` ? TrimRight<R> : TrimRight<T>;
+type TrimRight<T> = T extends `${infer R} ` ? TrimRight<R> : T;
+
+type Variable<T, P = VarParams<T>> = {
+  [K in P as K extends `${infer R}:${Space}${'Int' | 'Float'}${Suffix}` ? AliasName<R> : never]: number;
+}
+& {
+  [K in P as K extends `${infer R}:${Space}[${'Int' | 'Float'}${Suffix}]${Suffix}` ? AliasName<R> : never]: number[];
+}
+& {
+  [K in P as K extends `${infer R}:${Space}${'String' | 'ID'}${Suffix}` ? AliasName<R> : never]: string;
+}
+& {
+  [K in P as K extends `${infer R}:${Space}[${'String' | 'ID'}${Suffix}]${Suffix}` ? AliasName<R> : never]: string[];
+}
+& {
+  [K in P as K extends `${infer R}:${Space}Boolean${Suffix}` ? AliasName<R> : never]: boolean;
+}
+& {
+  [K in P as K extends `${infer R}:${Space}[Boolean]${Suffix}` ? AliasName<R> : never]: boolean[];
+}
+& {
+  [K in P as K extends `${string}:${Space}${'Int' | 'Float' | 'String' | 'Boolean' | 'ID'}${Suffix}`
+    ? never
+    : K extends `${string}[${string}]${Suffix}`
+      ? never
+      : K extends `${infer R}:${string}` ? AliasName<R> : never
+  ]: Record<string, any> | number | string | boolean;
+}
+& {
+  [K in P as K extends `${string}:${Space}[${'Int' | 'Float' | 'String' | 'Boolean' | 'ID'}${Suffix}]${Suffix}` ? never : K extends `${infer R}:${Space}[${string}]${Suffix}` ? AliasName<R> : never]: (Record<string, any> | number | string | boolean)[];
 };
 
 type QueryThis = {
@@ -26,7 +57,6 @@ export function query<T extends TemplateObj<K, V>, K extends any, V extends any>
 ): QueryReturn<T> {
   const ctx: ParseContext = {
     params: [],
-    paramAlias: {},
     fragmentStrs: [],
     fragmentObjs: [],
     fragmentIndex: {},
@@ -38,16 +68,9 @@ export function query<T extends TemplateObj<K, V>, K extends any, V extends any>
   const getQuery = () => lazyQuery || (lazyQuery = parse(type, options && options.name, template, ctx));
 
   const fn = (variables: object) => {
-    const query = getQuery();
-    const args = {};
-
-    Object.keys(variables).forEach((key) => {
-      args[ctx.paramAlias[key]] = variables[key];
-    });
-
     return {
-      query: query,
-      variables: args,
+      query: getQuery(),
+      variables,
     };
   };
 

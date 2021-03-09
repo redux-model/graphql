@@ -1,23 +1,19 @@
 import { ParseContext } from './parse';
 
 export const parseParameter = (value: string) => {
-  const alias_param = value.split(':');
-  const param = alias_param.pop()!;
-  const alias = alias_param.pop();
+  const match = value.match(/^([a-z0-9_]+)(?:\sas\s([a-z0-9_]+))?\s*:\s?(.+)$/i);
 
-  const item = param.split('_');
-
-  if (item.length < 2) {
-    throw new Error(`Parmeter ${value} is invalid, try to define it like: "a_Int", "b_String", "alias:c_Int" and so on.`);
+  if (!match) {
+    throw new Error(`Parmeter ${value} is invalid, try to define it like: "a: Int", "b: String", "c as myAlias: Int" and so on.`);
   }
 
-  const itemType = item.pop()!;
-  const itemName = item.join('_');
+  const itemName = match[1];
+  const alias = match[2];
 
   return {
     name: itemName,
     variable: alias || itemName,
-    type: itemType,
+    type: match[3],
   };
 };
 

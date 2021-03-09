@@ -8,7 +8,6 @@ export interface ParseContext {
   fragmentStrs: string[];
   fragmentObjs: FragmentMeta[];
   fragmentIndex: Record<string, number>;
-  paramAlias: Record<string, string>,
 }
 
 export const parse = (type: string, name: string | undefined, nodes: TemplateObj, ctx: ParseContext): string => {
@@ -20,7 +19,6 @@ export const parse = (type: string, name: string | undefined, nodes: TemplateObj
   const body = cycleParse(nodes, ctx, -2);
   const params = ctx.params.map((key) => {
     const param = parseParameter(key);
-    ctx.paramAlias[key] = param.variable;
 
     return `$${param.variable}: ${param.type}`;
   });

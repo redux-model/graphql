@@ -1,4 +1,5 @@
 import { createFragmentKey, FragmentMeta } from './fragment';
+import type { Space, Suffix } from './query';
 
 export type Template<K = any, V = any> = Types<K, V> | TemplateObj<K, V>;
 
@@ -178,7 +179,7 @@ export class Types<T = never, U = never> {
    * }
    * ```
    */
-  include<P extends string>(param_Boolean: P): Types<T | undefined, U | P> {
+  include<P  extends `${string}:${Space}Boolean${Suffix}`>(param_Boolean: P): Types<T | undefined, U | P> {
     const that = this.clone();
     that.includeParam = param_Boolean;
     that.appendParams([param_Boolean]);
@@ -198,7 +199,7 @@ export class Types<T = never, U = never> {
    * }
    * ```
    */
-  skip<P extends string>(param_Boolean: P): Types<T | undefined, U | P> {
+  skip<P extends `${string}:${Space}Boolean${Suffix}`>(param_Boolean: P): Types<T | undefined, U | P> {
     const that = this.clone();
     that.skipParam = param_Boolean;
     that.appendParams([param_Boolean]);
@@ -211,7 +212,7 @@ export class Types<T = never, U = never> {
    * For example: `page_Int` | `name_String` | `focus_Boolean` | `data_MyObject`
    * @param {Types} returns
    */
-  fn<U1 extends string, T1 extends Template>(
+  fn<U1 extends `${string}:${string}`, T1 extends Template>(
     params_Type: U1[],
     returns: T1
   ): Types<T | Parse<T1>, U | U1> {
