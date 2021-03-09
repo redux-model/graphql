@@ -5,17 +5,17 @@ Graphql模板运行时工具，自动生成标准模板和Typescript类型， �
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/redux-model/graphql/CI/master)](https://github.com/redux-model/graphql/actions)
 [![Codecov](https://img.shields.io/codecov/c/github/redux-model/graphql)](https://codecov.io/gh/redux-model/graphql)
 
+# 特性
+* 只需写一次，Graphql语法和Typescript同时拥有
+* 自动收集参数
+* 自动识别参数基础类型
+* 单一职责，只生成标准graphql字符串
+* 支持所有graphql语法
 
 # 安装
 ```bash
 yarn add @redux-model/graphql
 ```
-
-# 注意事项
-因为action本来就定义了参数，所以函数参数不再做类型约束。函数参数需遵循：`xxx_Int`, `yyy_String!`, `zzz_ObjInput`，以下划线`_`分割参数名和类型，这么做的好处是：
-
-1. 能够自动收集参数到模板顶部，提高效率
-2. 传递实参时，对类型一目了然，防止出错
 
 # 基础用法
 ```typescript
@@ -76,7 +76,7 @@ class TestModel extends Model<Data> {
 const tpl = graphql.query({
   getUser: {
     id: types.number,
-    logs: types.fn(['page_Int', 'size_Int'], types.array({
+    logs: types.fn(['page: Int!', 'pageSize as size: Int'], types.array({
       id: types.number,
       title: types.string,
     })),
@@ -84,10 +84,10 @@ const tpl = graphql.query({
 });
 
 // 生成模板：
-// query GetUser ($page: Int, $size: Int) {
+// query GetUser ($page: Int!, $size: Int) {
 //   getUser: {
 //     id
-//     logs (page: $page, size: $size) {
+//     logs (page: $page, pageSize: $size) {
 //       id
 //       title
 //     }
@@ -106,8 +106,8 @@ class TestModel extends Model<Data> {
     return this
       .post<Response>('/graphql')
       .graphql(tpl({
-        page_Int: page,
-        size_Int: size,
+        page,
+        size,
       }))
       .onSuccess((state, action) => {
         return action.response.data;
@@ -242,8 +242,8 @@ if ('age' in getUser) {
 ```typescript
 const tpl = graphql.query({
   getUser: {
-    id: types.number.include('test_Boolean'),   // number | undefined
-    logs: types.skip('other_Boolean').object({  // object | undefined
+    id: types.number.include('test: Boolean'),   // number | undefined
+    logs: types.skip('other: Boolean').object({  // object | undefined
       id: types.number,
       title: types.string,
     }),
