@@ -249,6 +249,28 @@ describe('Type definition', () => {
     });
   });
 
+  it ('function () => object include function', () => {
+    const tpl = graphql.query({
+      hello: types.fn(['a: String'], {
+        id: types.number,
+        name: types.fn(['b: Int'], types.string),
+      }),
+    });
+
+    (function () {
+      tpl.type.hello.name.toLowerCase();
+      // @ts-expect-error
+      tpl.type.hello.forEach;
+
+      tpl({
+        a: '2',
+        b: 2,
+        // @ts-expect-error
+        c: '3',
+      });
+    });
+  });
+
   it ('deep level function', () => {
     const tpl = graphql.query({
       hello: {

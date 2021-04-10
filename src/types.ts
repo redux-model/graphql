@@ -209,13 +209,13 @@ export class Types<T = never, U = never> {
   /**
    *
    * @param {String[]} params_Type
-   * For example: `page_Int` | `name_String` | `focus_Boolean` | `data_MyObject`
+   * @example `page: Int` | `name: String!` | `focus: Boolean` | `data: MyObject`
    * @param {Types} returns
    */
-  fn<U1 extends `${string}:${string}`, T1 extends Template>(
+  fn<U1 extends `${string}:${string}`, T1 extends Template<K, V>, K extends any, V extends any>(
     params_Type: U1[],
     returns: T1
-  ): Types<T | Parse<T1>, U | U1> {
+  ): Types<T | Parse<T1>, U | U1 | VarParams<T1>> {
     const that = this.clone();
     that.fnParams = params_Type;
     that.returns = returns;

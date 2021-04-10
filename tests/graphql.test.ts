@@ -132,6 +132,30 @@ describe('Graphql', () => {
     );
   });
 
+it ('function in function', () => {
+  const tpl = graphql.query({
+    hello: types.number,
+    hi: types.fn(['a: Int!'], {
+      how: types.undefined.string,
+      are: {
+        you: types.fn(['b: Int'], types.boolean),
+      },
+    }),
+  });
+
+  expect(tpl({ a: 3, b: 3 }).query).to.equal(
+`query Hello ($a: Int!, $b: Int) {
+  hello
+  hi (a: $a) {
+    how
+    are {
+      you (b: $b)
+    }
+  }
+}`
+  );
+});
+
   it ('wrong function parameter name', () => {
     const tpl = graphql.query({
       // @ts-expect-error
